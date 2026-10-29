@@ -33,9 +33,14 @@ for root, dirs, files in os.walk(REPO_PATH):
 
 porcelain.add(repo, paths=staged)
 try:
+    porcelain.remove(repo, ['test_ssh_conn.py'], cached=True)
+except Exception:
+    pass
+
+try:
     c = porcelain.commit(
         repo,
-        message=b"Add complete NestKerala real estate rental platform with tenant & visitor feedback system",
+        message=b"Fix deprecation warnings, add favicon route, add requirements.txt, and update route redirects",
         author=b"Fathima Farhana <fathimafarhana8714@gmail.com>",
         committer=b"Fathima Farhana <fathimafarhana8714@gmail.com>"
     )

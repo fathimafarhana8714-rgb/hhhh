@@ -1,8 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -15,7 +18,7 @@ class User(db.Model):
     role = db.Column(db.String(20), default='tenant', nullable=False) # 'tenant', 'owner', 'agent', 'admin'
     agency_name = db.Column(db.String(150), nullable=True)
     is_verified = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     # Relationships
     properties = db.relationship('Property', backref='owner_rel', lazy='dynamic', cascade='all, delete-orphan')
@@ -96,8 +99,8 @@ class Property(db.Model):
     contact_email = db.Column(db.String(120), nullable=True)
     owner_verified = db.Column(db.Boolean, default=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     images = db.relationship('PropertyImage', backref='property_rel', lazy='dynamic', cascade='all, delete-orphan', order_by='PropertyImage.image_order')
@@ -214,7 +217,7 @@ class Enquiry(db.Model):
     tenant_type = db.Column(db.String(50), default='Family')
     
     status = db.Column(db.String(30), default='pending') # 'pending', 'read', 'replied', 'closed'
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     def __repr__(self):
         return f'<Enquiry from {self.sender_name} for Prop {self.property_id}>'
@@ -236,7 +239,7 @@ class VisitRequest(db.Model):
     
     status = db.Column(db.String(30), default='pending') # 'pending', 'confirmed', 'declined', 'completed'
     owner_reply = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     def __repr__(self):
         return f'<VisitRequest for Prop {self.property_id} on {self.preferred_date}>'
@@ -248,7 +251,7 @@ class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     property_id = db.Column(db.Integer, db.ForeignKey('properties.id', ondelete='CASCADE'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'property_id', name='uq_user_property_favorite'),)
 
@@ -266,7 +269,7 @@ class PropertyReport(db.Model):
     details = db.Column(db.Text, nullable=False)
     
     status = db.Column(db.String(30), default='pending') # 'pending', 'reviewed', 'resolved'
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     def __repr__(self):
         return f'<Report for Prop {self.property_id}: {self.reason}>'
@@ -292,7 +295,7 @@ class PropertyFeedback(db.Model):
     landlord_rating = db.Column(db.Integer, default=5) # 1 to 5
 
     is_approved = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     def __repr__(self):
         return f'<PropertyFeedback {self.id} for Property {self.property_id} ({self.rating} stars)>'

@@ -3,7 +3,7 @@ import uuid
 from functools import wraps
 from flask import session, redirect, url_for, flash, request
 from werkzeug.utils import secure_filename
-from models import User, Property
+from models import db, User, Property
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
@@ -26,7 +26,7 @@ def save_uploaded_file(file, upload_folder):
 def get_current_user():
     user_id = session.get('user_id')
     if user_id:
-        return User.query.get(user_id)
+        return db.session.get(User, user_id)
     return None
 
 def login_required(f):
@@ -45,7 +45,7 @@ def role_required(*roles):
             if 'user_id' not in session:
                 flash("Please sign in to continue.", "warning")
                 return redirect(url_for('login', next=request.url))
-            user = User.query.get(session['user_id'])
+            user = db.session.get(User, session['user_id'])
             if not user or (user.role not in roles and user.role != 'admin'):
                 flash("You do not have permission to access that resource.", "danger")
                 return redirect(url_for('index'))

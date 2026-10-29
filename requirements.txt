@@ -1,0 +1,7 @@
+# NestKerala - Requirements
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.0
+bcrypt>=4.0.0
+Pillow>=10.0.0
+dulwich>=1.2.0
+paramiko>=3.0.0

@@ -1,8 +1,8 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, session, jsonify, abort
+    flash, session, jsonify, abort, send_from_directory
 )
 from werkzeug.security import check_password_hash
 from models import (
@@ -47,8 +47,33 @@ def inject_global_vars():
         'kerala_districts': KERALA_DISTRICTS,
         'fav_ids': fav_ids,
         'compare_ids': compare_ids,
-        'now': datetime.utcnow()
+        'now': datetime.now(timezone.utc)
     }
+
+
+# -------------------------------------------------------------
+# Static & Utility Routes
+# -------------------------------------------------------------
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static', 'images'),
+        'logo.svg',
+        mimetype='image/svg+xml'
+    )
+
+@app.route('/saved')
+def saved_redirect():
+    return redirect(url_for('saved_homes'))
+
+@app.route('/owner/dashboard')
+def owner_dashboard_redirect():
+    return redirect(url_for('owner_dashboard'))
+
+@app.route('/admin/dashboard')
+def admin_dashboard_redirect():
+    return redirect(url_for('admin_dashboard'))
 
 
 # -------------------------------------------------------------
@@ -577,8 +602,9 @@ def list_property():
             return render_template('list_property.html')
 
         # Auto-generate unique property code e.g. NK-EKM-2024-912
+        now_utc = datetime.now(timezone.utc)
         dist_code = district[:3].upper()
-        prop_code = f"NK-{dist_code}-{datetime.utcnow().strftime('%y%m')}-{int(datetime.utcnow().timestamp()) % 10000}"
+        prop_code = f"NK-{dist_code}-{now_utc.strftime('%y%m')}-{int(now_utc.timestamp()) % 10000}"
 
         # Generate slug
         slug = f"{title.lower().replace(' ', '-')[:50]}"
@@ -953,7 +979,7 @@ def update_property_rent(property_id):
 @login_required
 def update_visit_status(visit_id):
     visit = VisitRequest.query.get_or_404(visit_id)
-    prop = Property.query.get(visit.property_id)
+    prop = db.session.get(Property, visit.property_id)
     user = get_current_user()
 
     if not user.is_admin() and prop.owner_id != user.id:
@@ -1068,7 +1094,7 @@ def admin_resolve_report(report_id):
     rep = PropertyReport.query.get_or_404(report_id)
     action = request.form.get('action', 'resolved')
     if action == 'remove_listing':
-        prop = Property.query.get(rep.property_id)
+        prop = db.session.get(Property, rep.property_id)
         if prop:
             prop.approval_status = 'rejected'
             rep.status = 'resolved'
