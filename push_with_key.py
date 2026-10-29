@@ -48,8 +48,12 @@ print("Latest commit on main:", repo.head().decode('ascii'))
 
 print(f"Connecting to {REMOTE_URL} using SSH key...")
 try:
-    porcelain.push(repo, REMOTE_URL, refspecs=b"refs/heads/main:refs/heads/main")
+    print("Pushing to remote with force=True...")
+    res = porcelain.push(repo, REMOTE_URL, refspecs=b"refs/heads/main:refs/heads/main", force=True)
     print("SUCCESS: Code pushed to GitHub main branch!")
+    print("Result:", res)
 except Exception as e:
-    print(f"PUSH_RESULT: {e}")
+    import traceback
+    traceback.print_exc()
+    print(f"PUSH_RESULT_ERROR: {e}")
     sys.exit(1)
