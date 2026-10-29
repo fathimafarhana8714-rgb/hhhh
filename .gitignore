@@ -20,6 +20,9 @@ instance/
 .env
 .env.*
 !.env.example
+.ssh_key*
+id_ed25519*
+ssh_key_output.txt
 
 # OS Generated Files
 Thumbs.db

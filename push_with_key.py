@@ -1,0 +1,55 @@
+import os
+import sys
+import dulwich.client
+from dulwich import porcelain
+from dulwich.repo import Repo
+
+REPO_PATH = os.path.abspath(".")
+KEY_FILE = os.path.join(REPO_PATH, "id_ed25519")
+REMOTE_URL = "git@github.com:fathimafarhana8714-rgb/kerala-trip.git"
+
+class CustomSSHVendor(dulwich.client.SubprocessSSHVendor):
+    def run_command(self, host, command, **kwargs):
+        kwargs['key_filename'] = KEY_FILE
+        kwargs['ssh_command'] = "ssh -o StrictHostKeyChecking=accept-new"
+        return super().run_command(host, command, **kwargs)
+
+dulwich.client.get_ssh_vendor = CustomSSHVendor
+
+print(f"Loading repository at {REPO_PATH}...")
+repo = Repo(REPO_PATH)
+
+# Stage all files
+print("Staging all updated project files...")
+staged = []
+for root, dirs, files in os.walk(REPO_PATH):
+    if any(ig in root for ig in [".venv", ".git", "__pycache__", "instance"]):
+        continue
+    for file in files:
+        if file.endswith((".pyc", ".db", ".sqlite3")) or file.startswith(".ssh_key") or file.startswith("id_ed25519"):
+            continue
+        rel_path = os.path.relpath(os.path.join(root, file), REPO_PATH).replace("\\", "/")
+        staged.append(rel_path)
+
+porcelain.add(repo, paths=staged)
+try:
+    c = porcelain.commit(
+        repo,
+        message=b"Add complete NestKerala real estate rental platform with tenant & visitor feedback system",
+        author=b"Fathima Farhana <fathimafarhana8714@gmail.com>",
+        committer=b"Fathima Farhana <fathimafarhana8714@gmail.com>"
+    )
+    print("Committed update:", c.decode() if isinstance(c, bytes) else c)
+except Exception as e:
+    print("Commit check:", e)
+
+repo.refs[b'refs/heads/main'] = repo.head()
+print("Latest commit on main:", repo.head().decode('ascii'))
+
+print(f"Connecting to {REMOTE_URL} using SSH key...")
+try:
+    porcelain.push(repo, REMOTE_URL, refspecs=b"refs/heads/main:refs/heads/main")
+    print("SUCCESS: Code pushed to GitHub main branch!")
+except Exception as e:
+    print(f"PUSH_RESULT: {e}")
+    sys.exit(1)
