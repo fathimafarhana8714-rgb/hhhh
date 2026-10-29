@@ -40,7 +40,7 @@ except Exception:
 try:
     c = porcelain.commit(
         repo,
-        message=b"Fix deprecation warnings, add favicon route, add requirements.txt, and update route redirects",
+        message=b"Update README documentation, launcher scripts, requirements, and feedback system details",
         author=b"Fathima Farhana <fathimafarhana8714@gmail.com>",
         committer=b"Fathima Farhana <fathimafarhana8714@gmail.com>"
     )

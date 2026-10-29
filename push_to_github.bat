@@ -1,50 +1,25 @@
 @echo off
 echo ========================================================
-echo Pushing NestKerala to GitHub (kerala-trip)
+echo Pushing NestKerala to GitHub (fathimafarhana8714-rgb/kerala-trip)
 echo ========================================================
 
-cd /d "C:\Users\Dell\Documents\nestkerala"
+cd /d "%~dp0"
 
-REM Check if git is available
-where git >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [ERROR] Git is not installed or not in your system PATH.
-    echo Please install Git for Windows from: https://git-scm.com/download/win
-    echo Then run this file again.
+if exist ".venv\Scripts\python.exe" (
+    echo Using secure Python SSH push runner...
+    ".venv\Scripts\python.exe" push_with_key.py
     pause
-    exit /b 1
+    exit /b %errorlevel%
 )
 
-echo [1/5] Initializing Git repository...
-if not exist ".git" (
-    git init
-)
-
-echo [2/5] Staging files...
-git add .
-
-echo [3/5] Creating commit...
-git commit -m "Complete NestKerala Platform with Feedback & Reviews System"
-
-echo [4/5] Setting main branch and remote origin...
-git branch -M main
-git remote remove origin 2>nul
-git remote add origin git@github.com:fathimafarhana8714-rgb/kerala-trip.git
-
-echo [5/5] Pushing to GitHub...
-git push -u origin main
-
+where git >nul 2>nul
 if %errorlevel% equ 0 (
-    echo.
-    echo ========================================================
-    echo SUCCESS! Your project has been pushed to GitHub:
-    echo git@github.com:fathimafarhana8714-rgb/kerala-trip.git
-    echo ========================================================
-) else (
-    echo.
-    echo [NOTE] If SSH key is not configured, try pushing via HTTPS:
-    echo git remote set-url origin https://github.com/fathimafarhana8714-rgb/kerala-trip.git
-    echo git push -u origin main
+    git add .
+    git commit -m "Update NestKerala repository"
+    git push -u origin main
+    pause
+    exit /b %errorlevel%
 )
 
+echo [ERROR] Neither Python venv nor git found.
 pause

@@ -65,6 +65,16 @@ Every listing includes detailed housing attributes tailored to Kerala realities:
 - **Owners & Agents:** Add properties, upload multi-angle photos, edit listings, quick rent update, toggle status (Available / Rented), manage incoming tenant inquiries, confirm or decline visit requests.
 - **Super Administrator (`/admin`):** Review pending submissions, Approve/Reject listings, assign "Verified by NestKerala" badge, feature properties, review reported listings, and monitor user accounts.
 
+### 9. Dedicated Tenant & Visitor Feedback System
+- **Per-Home Reviews:** Dedicated feedback section on every property details page with direct action link to submit authentic feedback.
+- **Kerala-Specific Ratings:**
+  - Overall Rating (1 to 5 Stars)
+  - Water Supply & Quality (KWA / Well Sweetness)
+  - Location Safety & Quietness (Access road quality, neighborhood calm)
+  - Landlord / Owner Responsiveness
+- **Visitor Context:** Feedback distinguishes between *Visited in Person*, *Previous Tenant*, *Neighborhood Resident*, and *Prospective Seeker*.
+- **Moderation Ready:** Feedbacks are stored in SQLite and linked to property listings with approval flags.
+
 ---
 
 ## 🔑 Demonstration One-Click Login Credentials
@@ -83,18 +93,24 @@ The database is pre-seeded with verified test accounts across all roles:
 
 ## 🚀 How to Run the Application
 
-1. Open PowerShell / Command Prompt in the project folder:
-   ```powershell
-   cd c:\Users\Dell\Documents\nestkerala
+1. Clone or navigate to the repository:
+   ```bash
+   git clone git@github.com:fathimafarhana8714-rgb/kerala-trip.git
+   cd kerala-trip
    ```
 
-2. Start the application:
-   ```powershell
-   .\.venv\Scripts\python.exe app.py
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
    ```
-   *Or simply double-click `run.bat`.*
 
-3. Open your browser and visit:
+3. Start the application:
+   ```bash
+   python app.py
+   ```
+   *On Windows, you can also double-click `run.bat` or use `.\.venv\Scripts\python.exe app.py`.*
+
+4. Open your browser and visit:
    ```
    http://127.0.0.1:5000
    ```
@@ -103,21 +119,23 @@ The database is pre-seeded with verified test accounts across all roles:
 
 ## 🧪 Automated Test Suite
 
-A complete test suite covering all 13 core functional areas is included:
+A comprehensive test suite covering all 15 functional areas is included:
 ```powershell
-.\.venv\Scripts\python.exe test_app.py
+python test_app.py
 ```
 Test suite verifies:
-- Homepage rendering and branding
-- Properties search and query filtering
-- District filtering
-- Smart Recommendation engine on low matches
-- Property details page with Leaflet map and landmarks
-- Direct Enquiry form database submission
-- Property Visit booking workflow
-- Saved Homes & Favorites system
-- Side-by-side comparison matrix
-- User authentication and role-based access
-- List Your Property submission pipeline
-- Owner & Agent dashboard
-- Bilingual language toggle
+- Homepage rendering and branding (200 OK)
+- Properties search and query filtering (200 OK)
+- District filtering (200 OK)
+- Smart Recommendation engine on low matches (200 OK)
+- Property details page with Leaflet map and landmarks (200 OK)
+- Direct Enquiry form database submission (200 OK)
+- Property Visit booking workflow (200 OK)
+- Saved Homes & Favorites system (200 OK)
+- Side-by-side comparison matrix (200 OK)
+- Admin Login & Control Center (200 OK)
+- List Your Property submission pipeline (200 OK)
+- Owner & Agent dashboard (200 OK)
+- Bilingual language toggle (200 OK)
+- Property Feedback view page (200 OK)
+- Property Feedback Submission and validation (200 OK)
