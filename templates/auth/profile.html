@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile & Activity | NestKerala{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 960px; padding: 3rem 1.25rem 5rem;">
+  <div style="margin-bottom: 2rem;">
+    <span class="section-pretitle">Account Settings</span>
+    <h1 class="section-title">My Profile & Enquiries</h1>
+    <p class="text-muted">Manage your personal details and track your sent enquiries and visit requests.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- Profile Edit Card -->
+    <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.75rem; height: fit-content;">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-700); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 700; margin: 0 auto 0.75rem;">
+          {{ user.full_name[:1].upper() }}
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem;">{{ user.full_name }}</h3>
+        <span class="role-pill role-{{ user.role }}">{{ user.role|capitalize }}</span>
+        {% if user.agency_name %}
+        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">{{ user.agency_name }}</div>
+        {% endif %}
+      </div>
+
+      <form action="{{ url_for('profile') }}" method="POST">
+        <div class="form-group">
+          <label class="form-label required">Full Name</label>
+          <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (Read only)</label>
+          <input type="email" class="form-control" value="{{ user.email }}" disabled style="background: #F1F5F9;">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Phone Number</label>
+          <input type="tel" name="phone" class="form-control" value="{{ user.phone }}" required>
+        </div>
+        {% if user.role == 'agent' %}
+        <div class="form-group">
+          <label class="form-label">Agency / Firm Name</label>
+          <input type="text" name="agency_name" class="form-control" value="{{ user.agency_name or '' }}">
+        </div>
+        {% endif %}
+        <div class="form-group">
+          <label class="form-label">Change Password</label>
+          <input type="password" name="new_password" class="form-control" placeholder="Leave blank to keep current">
+        </div>
+        <button type="submit" class="btn btn-primary-emerald btn-block">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Right Side: Activity History -->
+    <div>
+      <!-- Visit Requests Sent -->
+      <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Requested Property Visits ({{ sent_visits|length }})
+        </h3>
+
+        {% if sent_visits %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {% for visit in sent_visits %}
+          <div style="border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem; background: var(--bg-cream);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+              <div>
+                <strong>
+                  <a href="{{ url_for('property_detail', property_id=visit.property_id) }}">
+                    {{ visit.property_rel.title if visit.property_rel else 'Property #' ~ visit.property_id }}
+                  </a>
+                </strong>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                  Requested for: <strong>{{ visit.preferred_date }}</strong> &bull; {{ visit.preferred_time_slot }}
+                </div>
+              </div>
+              <span class="badge {% if visit.status == 'confirmed' %}badge-verified{% elif visit.status == 'declined' %}badge-rented{% else %}badge-demo{% endif %}">
+                {{ visit.status|capitalize }}
+              </span>
+            </div>
+            {% if visit.owner_reply %}
+            <div style="margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: white; border-radius: 4px; font-size: 0.85rem; border-left: 3px solid var(--primary-700);">
+              <strong>Owner Response:</strong> {{ visit.owner_reply }}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted" style="font-size: 0.9rem;">You have not scheduled any property viewings yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- Enquiries Sent -->
+      <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.75rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          Direct Inquiries Sent ({{ sent_enquiries|length }})
+        </h3>
+
+        {% if sent_enquiries %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {% for enq in sent_enquiries %}
+          <div style="border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+              <strong>
+                <a href="{{ url_for('property_detail', property_id=enq.property_id) }}">
+                  {{ enq.property_rel.title if enq.property_rel else 'Property #' ~ enq.property_id }}
+                </a>
+              </strong>
+              <small class="text-muted">{{ enq.created_at.strftime('%d %b %Y') }}</small>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 0.5rem;">"{{ enq.message }}"</p>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Move-in: {{ enq.move_in_date }} &bull; Profile: {{ enq.tenant_type }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted" style="font-size: 0.9rem;">You haven't sent any inquiries yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NestKerala – Find Your Perfect Home in Kerala{% endblock %}</title>
+  <meta name="description" content="NestKerala is Kerala's premium real estate rental marketplace. Discover verified rental villas, traditional nalukettu homes, and modern apartments across all 14 districts of Kerala.">
+
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Custom Master Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="lang-{{ current_lang }}">
+
+  <!-- Top Announcement / Verification Banner -->
+  <div class="top-announcement-bar">
+    <div class="container top-bar-content">
+      <div class="top-bar-left">
+        <span class="pulse-indicator"></span>
+        <span class="en-text">Kerala's Trusted Rental Network &bull; Zero Brokerage Surprises &bull; 100% Verified Owners</span>
+        <span class="ml-text">കേരളത്തിലെ വിശ്വസ്ത വാടക ഭവന പ്ലാറ്റ്‌ഫോം &bull; ബ്രോക്കറേജ് ഇല്ല &bull; നേരിട്ട് ഉടമകളെ ബന്ധപ്പെടാം</span>
+      </div>
+      <div class="top-bar-right">
+        <!-- Language Switcher -->
+        <div class="lang-toggle-group">
+          <a href="{{ url_for('set_language', lang='en') }}" class="lang-btn {% if current_lang == 'en' %}active{% endif %}">EN</a>
+          <span class="divider">|</span>
+          <a href="{{ url_for('set_language', lang='ml') }}" class="lang-btn {% if current_lang == 'ml' %}active{% endif %}">മലയാളം</a>
+        </div>
+        <span class="top-helpline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          <span class="en-text">Helpline: +91 94470 12000</span>
+          <span class="ml-text">സഹായത്തിന്: +91 94470 12000</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="main-header" id="navbar">
+    <div class="container nav-container">
+      <!-- Brand Logo -->
+      <a href="{{ url_for('index') }}" class="brand-logo" aria-label="NestKerala Homepage">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NestKerala – Find Your Perfect Home in Kerala" height="46">
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="nav-links">
+        <a href="{{ url_for('properties') }}" class="nav-link">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="en-text">Explore Rentals</span>
+          <span class="ml-text">വീടുകൾ കണ്ടെത്തുക</span>
+        </a>
+
+        <!-- Districts Dropdown -->
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-btn" aria-haspopup="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span class="en-text">Kerala Districts</span>
+            <span class="ml-text">ജില്ലകൾ</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="dropdown-menu districts-dropdown-grid">
+            <div class="dropdown-header">
+              <strong>All 14 Districts of Kerala</strong>
+              <small>Click to view verified rental properties</small>
+            </div>
+            <div class="district-items-wrapper">
+              {% for dist in districts_info %}
+              <a href="{{ url_for('properties', district=dist.name) }}" class="district-dropdown-item">
+                <span class="district-name">{{ dist.name }}</span>
+                <span class="district-malayalam">{{ dist.malayalam }}</span>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <a href="{{ url_for('saved_homes') }}" class="nav-link nav-favorites-link">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span class="en-text">Saved</span>
+          <span class="ml-text">സേവ് ചെയ്തവ</span>
+          <span class="badge-count" id="favCountBadge">{{ fav_ids|length }}</span>
+        </a>
+
+        <a href="{{ url_for('compare') }}" class="nav-link nav-compare-link">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+          <span class="en-text">Compare</span>
+          <span class="ml-text">താരതമ്യം</span>
+          <span class="badge-count" id="compareCountBadge">{{ compare_ids|length }}</span>
+        </a>
+      </nav>
+
+      <!-- User & Action CTA Section -->
+      <div class="nav-actions">
+        <!-- List Property CTA -->
+        <a href="{{ url_for('list_property') }}" class="btn btn-secondary-emerald btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span class="en-text">List Your Property</span>
+          <span class="ml-text">വീട് ലിസ്റ്റ് ചെയ്യുക</span>
+        </a>
+
+        {% if current_user %}
+        <!-- User Menu Dropdown -->
+        <div class="nav-dropdown user-menu-dropdown">
+          <button class="user-avatar-btn" aria-haspopup="true">
+            <span class="user-initial">{{ current_user.full_name[:1].upper() }}</span>
+            <span class="user-name-label">{{ current_user.full_name.split()[0] }}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="dropdown-menu user-dropdown-content">
+            <div class="user-menu-header">
+              <div class="header-name">{{ current_user.full_name }}</div>
+              <div class="header-email">{{ current_user.email }}</div>
+              <span class="role-pill role-{{ current_user.role }}">{{ current_user.role|capitalize }}</span>
+            </div>
+            <div class="user-menu-links">
+              {% if current_user.is_admin() %}
+              <a href="{{ url_for('admin_dashboard') }}" class="user-menu-item highlight">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Admin Control Center
+              </a>
+              {% endif %}
+              
+              {% if current_user.is_owner_or_agent() %}
+              <a href="{{ url_for('owner_dashboard') }}" class="user-menu-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Owner Dashboard
+              </a>
+              {% endif %}
+
+              <a href="{{ url_for('profile') }}" class="user-menu-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                My Profile & Enquiries
+              </a>
+              <a href="{{ url_for('saved_homes') }}" class="user-menu-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                Saved Properties
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="{{ url_for('logout') }}" class="user-menu-item text-danger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="auth-buttons">
+          <a href="{{ url_for('login') }}" class="btn btn-outline-emerald btn-sm">
+            <span class="en-text">Sign In</span>
+            <span class="ml-text">ലോഗിൻ</span>
+          </a>
+          <a href="{{ url_for('register') }}" class="btn btn-primary-emerald btn-sm">
+            <span class="en-text">Register</span>
+            <span class="ml-text">രജിസ്റ്റർ</span>
+          </a>
+        </div>
+        {% endif %}
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Navigation -->
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-header">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NestKerala" height="38">
+        <button class="drawer-close-btn" id="drawerCloseBtn">&times;</button>
+      </div>
+      <div class="mobile-drawer-links">
+        <a href="{{ url_for('properties') }}" class="mobile-nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          Browse All Rentals
+        </a>
+        <a href="{{ url_for('list_property') }}" class="mobile-nav-item highlight-cta">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          List Your Property (Free)
+        </a>
+        <a href="{{ url_for('saved_homes') }}" class="mobile-nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          Saved Homes ({{ fav_ids|length }})
+        </a>
+        <a href="{{ url_for('compare') }}" class="mobile-nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+          Compare Properties ({{ compare_ids|length }})
+        </a>
+
+        <div class="mobile-section-title">Kerala Districts</div>
+        <div class="mobile-districts-grid">
+          {% for dist in districts_info %}
+          <a href="{{ url_for('properties', district=dist.name) }}" class="mobile-district-chip">
+            {{ dist.name }}
+          </a>
+          {% endfor %}
+        </div>
+
+        <div class="drawer-auth-block">
+          {% if current_user %}
+            <div class="logged-user-info">Logged in as <strong>{{ current_user.full_name }}</strong></div>
+            {% if current_user.is_admin() %}
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-emerald btn-block mb-2">Admin Dashboard</a>
+            {% elif current_user.is_owner_or_agent() %}
+            <a href="{{ url_for('owner_dashboard') }}" class="btn btn-outline-emerald btn-block mb-2">Owner Dashboard</a>
+            {% endif %}
+            <a href="{{ url_for('profile') }}" class="btn btn-secondary-emerald btn-block mb-2">My Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger-soft btn-block">Sign Out</a>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-emerald btn-block mb-2">Sign In</a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary-emerald btn-block">Register Account</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+  </header>
+
+  <!-- Flash Messages Notifications -->
+  <div class="flash-messages-container container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} animate-slide-down">
+            <div class="alert-icon">
+              {% if category == 'success' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              {% elif category == 'danger' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              {% else %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              {% endif %}
+            </div>
+            <div class="alert-message">{{ message }}</div>
+            <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Body Content Block -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Sticky Comparison Floating Bar -->
+  <div class="sticky-compare-bar {% if compare_ids %}is-active{% endif %}" id="stickyCompareBar">
+    <div class="container compare-bar-inner">
+      <div class="compare-bar-left">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+        <span class="compare-bar-text">
+          <strong id="compareBarCount">{{ compare_ids|length }}</strong> of 3 properties selected for comparison
+        </span>
+      </div>
+      <div class="compare-bar-actions">
+        <a href="{{ url_for('compare') }}" class="btn btn-primary-emerald btn-sm">
+          Compare Now
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+        <form action="{{ url_for('clear_compare') }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-ghost btn-sm text-muted">Clear</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professional Platform Footer -->
+  <footer class="main-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <!-- Brand & Vision -->
+        <div class="footer-col brand-col">
+          <img src="{{ url_for('static', filename='images/logo-white.svg') }}" alt="NestKerala" height="48" class="footer-logo">
+          <p class="footer-mission">
+            Kerala's dedicated, reliable, and intelligent rental property marketplace connecting tenants, homeowners, and licensed real estate agents across all 14 districts.
+          </p>
+          <div class="kerala-badge-pill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E5B96B" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+            Built for Authentic Kerala Homes &bull; Zero Spam
+          </div>
+        </div>
+
+        <!-- 14 Kerala Districts Quick Links (Group 1) -->
+        <div class="footer-col">
+          <h4 class="footer-title">Major Rental Hubs</h4>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('properties', district='Ernakulam') }}">Kochi & Ernakulam (Kakkanad, Edappally)</a></li>
+            <li><a href="{{ url_for('properties', district='Thiruvananthapuram') }}">Trivandrum (Technopark, Kowdiar)</a></li>
+            <li><a href="{{ url_for('properties', district='Kozhikode') }}">Kozhikode (Nadakkavu, Cyberpark)</a></li>
+            <li><a href="{{ url_for('properties', district='Thrissur') }}">Thrissur (Punkunnam, Ayyanthole)</a></li>
+            <li><a href="{{ url_for('properties', district='Kottayam') }}">Kottayam (Kanjikuzhi, Pala)</a></li>
+            <li><a href="{{ url_for('properties', district='Alappuzha') }}">Alappuzha (Canal Homes, Mullakkal)</a></li>
+          </ul>
+        </div>
+
+        <!-- 14 Kerala Districts Quick Links (Group 2) -->
+        <div class="footer-col">
+          <h4 class="footer-title">Other Kerala Districts</h4>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('properties', district='Kollam') }}">Kollam (Asramam, Tangasseri)</a></li>
+            <li><a href="{{ url_for('properties', district='Palakkad') }}">Palakkad (Kalpathy, Chandranagar)</a></li>
+            <li><a href="{{ url_for('properties', district='Malappuram') }}">Malappuram (Manjeri, Perinthalmanna)</a></li>
+            <li><a href="{{ url_for('properties', district='Wayanad') }}">Wayanad (Kalpetta, Plantation Villas)</a></li>
+            <li><a href="{{ url_for('properties', district='Kannur') }}">Kannur (Payyambalam Beach Homes)</a></li>
+            <li><a href="{{ url_for('properties', district='Idukki') }}">Idukki (Thodupuzha Foothill Homes)</a></li>
+            <li><a href="{{ url_for('properties', district='Pathanamthitta') }}">Pathanamthitta (Thiruvalla NRI Villas)</a></li>
+            <li><a href="{{ url_for('properties', district='Kasaragod') }}">Kasaragod (Vidyanagar, Northern Kerala)</a></li>
+          </ul>
+        </div>
+
+        <!-- Quick Platform Navigation & Transparency -->
+        <div class="footer-col">
+          <h4 class="footer-title">Platform & Trust</h4>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('list_property') }}">Post Rental Property for Free</a></li>
+            <li><a href="{{ url_for('properties') }}">Browse Verified Listings</a></li>
+            <li><a href="{{ url_for('compare') }}">Compare Up to 3 Homes</a></li>
+            <li><a href="{{ url_for('saved_homes') }}">My Saved Favorites</a></li>
+            <li><a href="{{ url_for('login') }}">Owner & Agent Portal</a></li>
+          </ul>
+
+          <div class="footer-contact-box">
+            <div class="contact-label">Owner Listing Support:</div>
+            <div class="contact-val">support@nestkerala.com</div>
+            <div class="contact-val">+91 94470 12000 (Mon–Sat, 9AM–6PM)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demonstration Data Transparency Disclaimer & Copyright -->
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <div class="footer-legal">
+          &copy; {{ now.year }} NestKerala. Find Your Perfect Home in Kerala. All rights reserved.
+        </div>
+        <div class="footer-transparency-note">
+          <span class="shield-icon">&check;</span>
+          Platform Quality Standard: All demonstration data is explicitly labeled. Genuine owner property submissions undergo telephone and photo verification prior to the verified badge assignment.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Main Platform JavaScript -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block title %}Owner & Agent Dashboard | NestKerala{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 1.25rem 5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <span class="section-pretitle">Property Management</span>
+      <h1 class="section-title">Owner & Agent Dashboard</h1>
+      <p class="text-muted">Manage your Kerala rental listings, respond to prospective tenants, and schedule home viewings.</p>
+    </div>
+    <a href="{{ url_for('list_property') }}" class="btn btn-primary-emerald">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add New Listing
+    </a>
+  </div>
+
+  <!-- KPI Metrics Strip -->
+  <div class="dashboard-metrics-grid">
+    <div class="metric-box">
+      <div class="metric-icon-wrap">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+      </div>
+      <div>
+        <div class="metric-val">{{ total_properties }}</div>
+        <div class="metric-label">Total Listings</div>
+      </div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-icon-wrap" style="background: #ECFDF5; color: #059669;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <div>
+        <div class="metric-val">{{ available_count }}</div>
+        <div class="metric-label">Active Available</div>
+      </div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-icon-wrap" style="background: #FEF2F2; color: #DC2626;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+      </div>
+      <div>
+        <div class="metric-val">{{ rented_count }}</div>
+        <div class="metric-label">Properties Rented</div>
+      </div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-icon-wrap" style="background: #EFF6FF; color: #2563EB;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path></svg>
+      </div>
+      <div>
+        <div class="metric-val">{{ enquiries|length }}</div>
+        <div class="metric-label">Tenant Enquiries</div>
+      </div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-icon-wrap" style="background: #FFFBEB; color: #D97706;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      </div>
+      <div>
+        <div class="metric-val">{{ pending_visits }}</div>
+        <div class="metric-label">Pending Visits</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: My Properties Table -->
+  <div class="dashboard-table-card">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-900);">My Rental Listings ({{ properties|length }})</h2>
+      <small class="text-muted">Review, edit rental prices, and toggle rented status</small>
+    </div>
+
+    {% if properties %}
+    <div style="overflow-x: auto;">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Location</th>
+            <th>Monthly Rent</th>
+            <th>Status</th>
+            <th>Verification</th>
+            <th>Approval</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prop in properties %}
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <img src="{{ prop.primary_image_url }}" alt="" style="width: 54px; height: 42px; object-fit: cover; border-radius: 4px;">
+                <div>
+                  <strong><a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a></strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">{{ prop.property_code }} &bull; {{ prop.bhk }} BHK</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ prop.city_town }}, {{ prop.district }}</td>
+            <td>
+              <strong>{{ prop.formatted_rent }}</strong>
+              <button class="btn btn-ghost btn-sm" style="padding: 0 4px; font-size: 0.75rem;" onclick="promptRentUpdate({{ prop.id }}, {{ prop.monthly_rent }}, {{ prop.security_deposit }})">✏️ Edit</button>
+            </td>
+            <td>
+              <span class="badge {% if prop.status == 'Available' %}badge-verified{% else %}badge-rented{% endif %}">
+                {{ prop.status }}
+              </span>
+            </td>
+            <td>
+              {% if prop.is_verified %}
+              <span class="badge badge-verified">&check; Verified</span>
+              {% else %}
+              <span class="badge badge-demo">Pending Badge</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {% if prop.approval_status == 'approved' %}badge-verified{% elif prop.approval_status == 'pending' %}badge-demo{% else %}badge-rented{% endif %}">
+                {{ prop.approval_status|capitalize }}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.35rem;">
+                <form action="{{ url_for('toggle_property_status', property_id=prop.id) }}" method="POST">
+                  <button type="submit" class="btn btn-ghost btn-sm" title="Toggle Available / Rented">
+                    {{ 'Mark Rented' if prop.status == 'Available' else 'Mark Available' }}
+                  </button>
+                </form>
+                <a href="{{ url_for('edit_property', property_id=prop.id) }}" class="btn btn-secondary-emerald btn-sm">Edit</a>
+                <form action="{{ url_for('delete_property', property_id=prop.id) }}" method="POST" onsubmit="return confirm('Permanently delete this property?');">
+                  <button type="submit" class="btn btn-danger-soft btn-sm" title="Delete listing">&times;</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding: 3rem; text-align: center;">
+      <p class="text-muted">You have not listed any properties yet.</p>
+      <a href="{{ url_for('list_property') }}" class="btn btn-primary-emerald mt-2">Post Your First Listing</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Section 2: Incoming Tenant Visit Requests -->
+  <div class="dashboard-table-card">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-light);">
+      <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-900);">Scheduled Property Visits ({{ visit_requests|length }})</h2>
+    </div>
+
+    {% if visit_requests %}
+    <div style="overflow-x: auto;">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Prospective Tenant</th>
+            <th>Requested Date & Slot</th>
+            <th>Notes</th>
+            <th>Status</th>
+            <th>Manage Appointment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for visit in visit_requests %}
+          <tr>
+            <td>
+              <strong><a href="{{ url_for('property_detail', property_id=visit.property_id) }}">{{ visit.property_rel.title if visit.property_rel else 'Property #' ~ visit.property_id }}</a></strong>
+            </td>
+            <td>
+              <div style="font-weight: 600;">{{ visit.visitor_name }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">
+                <a href="tel:{{ visit.visitor_phone }}">{{ visit.visitor_phone }}</a>
+              </div>
+            </td>
+            <td>
+              <strong>{{ visit.preferred_date }}</strong>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">{{ visit.preferred_time_slot }}</div>
+            </td>
+            <td style="max-width: 250px;">
+              <small>{{ visit.notes or 'No special instructions' }}</small>
+            </td>
+            <td>
+              <span class="badge {% if visit.status == 'confirmed' %}badge-verified{% elif visit.status == 'declined' %}badge-rented{% else %}badge-demo{% endif %}">
+                {{ visit.status|capitalize }}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.4rem;">
+                <form action="{{ url_for('update_visit_status', visit_id=visit.id) }}" method="POST">
+                  <input type="hidden" name="status" value="confirmed">
+                  <button type="submit" class="btn btn-primary-emerald btn-sm" title="Confirm Visit">&check; Confirm</button>
+                </form>
+                <form action="{{ url_for('update_visit_status', visit_id=visit.id) }}" method="POST">
+                  <input type="hidden" name="status" value="declined">
+                  <button type="submit" class="btn btn-danger-soft btn-sm" title="Decline Visit">&times; Decline</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding: 2.5rem; text-align: center;" class="text-muted">
+      No visit requests received yet.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Section 3: Incoming Inquiries Inbox -->
+  <div class="dashboard-table-card">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-light);">
+      <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-900);">Incoming Tenant Enquiries ({{ enquiries|length }})</h2>
+    </div>
+
+    {% if enquiries %}
+    <div style="overflow-x: auto;">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Property</th>
+            <th>Tenant</th>
+            <th>Phone / WhatsApp</th>
+            <th>Move-in & Type</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for enq in enquiries %}
+          <tr>
+            <td>{{ enq.created_at.strftime('%d %b %Y') }}</td>
+            <td>
+              <strong><a href="{{ url_for('property_detail', property_id=enq.property_id) }}">{{ enq.property_rel.title if enq.property_rel else 'Property #' ~ enq.property_id }}</a></strong>
+            </td>
+            <td>{{ enq.sender_name }}</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <a href="tel:{{ enq.sender_phone }}" class="btn btn-call btn-sm" style="padding: 2px 6px;">Call</a>
+                <a href="https://wa.me/{{ enq.sender_phone|replace(' ', '')|replace('+', '') }}" target="_blank" class="btn btn-whatsapp btn-sm" style="padding: 2px 6px;">WA</a>
+                <small>{{ enq.sender_phone }}</small>
+              </div>
+            </td>
+            <td>
+              <div>{{ enq.tenant_type }}</div>
+              <small class="text-muted">{{ enq.move_in_date }}</small>
+            </td>
+            <td style="max-width: 300px;">
+              <small>{{ enq.message }}</small>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding: 2.5rem; text-align: center;" class="text-muted">
+      No enquiries received yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Rent Update Helper Modal -->
+<div class="modal-backdrop" id="rentUpdateModal">
+  <div class="modal-box" style="max-width: 400px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Update Rental Price</h3>
+      <button class="modal-close-btn" onclick="closeRentModal()">&times;</button>
+    </div>
+    <form id="rentUpdateForm" method="POST">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label required">Monthly Rent (₹)</label>
+          <input type="number" name="monthly_rent" id="modalRentInput" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Security Deposit (₹)</label>
+          <input type="number" name="security_deposit" id="modalDepositInput" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary-emerald btn-block">Save New Price</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function promptRentUpdate(propId, curRent, curDep) {
+    document.getElementById('rentUpdateForm').action = `/property/${propId}/update-rent`;
+    document.getElementById('modalRentInput').value = curRent;
+    document.getElementById('modalDepositInput').value = curDep;
+    document.getElementById('rentUpdateModal').classList.add('is-open');
+  }
+  function closeRentModal() {
+    document.getElementById('rentUpdateModal').classList.remove('is-open');
+  }
+</script>
+{% endblock %}

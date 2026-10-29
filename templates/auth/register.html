@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Create an Account | NestKerala Registration{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 520px; padding: 4rem 1.25rem 6rem;">
+  <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-md);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NestKerala" height="42" style="margin: 0 auto 1rem;">
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--primary-900);">Create Your Account</h1>
+      <p class="text-muted" style="font-size: 0.9rem;">Join Kerala's authentic rental community.</p>
+    </div>
+
+    <form action="{{ url_for('register') }}" method="POST">
+      <div class="form-group">
+        <label class="form-label required">I am a</label>
+        <select name="role" id="roleSelector" class="form-control" onchange="toggleAgentField(this.value)">
+          <option value="tenant">Tenant / Home Seeker</option>
+          <option value="owner">Individual Homeowner / Landlord</option>
+          <option value="agent">Licensed Real Estate Agent / Firm</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="agencyFieldWrap" style="display: none;">
+        <label class="form-label required">Real Estate Firm / Agency Name</label>
+        <input type="text" name="agency_name" class="form-control" placeholder="e.g. Kochi Prime Properties">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Full Legal Name</label>
+        <input type="text" name="full_name" class="form-control" required placeholder="e.g. Anand Varma">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Email Address</label>
+        <input type="email" name="email" class="form-control" required placeholder="name@example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Mobile Phone Number</label>
+        <input type="tel" name="phone" class="form-control" required placeholder="+91 98470 XXXXX">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Password</label>
+        <input type="password" name="password" class="form-control" required minlength="6" placeholder="At least 6 characters">
+      </div>
+
+      <button type="submit" class="btn btn-primary-emerald btn-block btn-lg" style="margin-top: 1.5rem;">
+        Register Account
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+      Already have an account? <a href="{{ url_for('login') }}" style="font-weight: 700;">Sign in here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleAgentField(role) {
+    const wrap = document.getElementById('agencyFieldWrap');
+    if (wrap) {
+      wrap.style.display = (role === 'agent') ? 'block' : 'none';
+    }
+  }
+</script>
+{% endblock %}

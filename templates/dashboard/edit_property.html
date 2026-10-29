@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Listing – {{ property.title }} | NestKerala{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding: 3rem 1.25rem 5rem;">
+  <div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('owner_dashboard') }}" class="text-muted" style="font-size: 0.9rem;">&larr; Back to Owner Dashboard</a>
+    <h1 class="section-title" style="margin-top: 0.5rem;">Edit Property: {{ property.property_code }}</h1>
+  </div>
+
+  <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-sm);">
+    <form action="{{ url_for('edit_property', property_id=property.id) }}" method="POST" enctype="multipart/form-data">
+      
+      <!-- Basic Details -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem;">
+        Property Information
+      </h3>
+
+      <div class="form-group">
+        <label class="form-label required">Property Title</label>
+        <input type="text" name="title" class="form-control" value="{{ property.title }}" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Status</label>
+          <select name="status" class="form-control">
+            <option value="Available" {% if property.status == 'Available' %}selected{% endif %}>Available</option>
+            <option value="Under Negotiation" {% if property.status == 'Under Negotiation' %}selected{% endif %}>Under Negotiation</option>
+            <option value="Rented" {% if property.status == 'Rented' %}selected{% endif %}>Rented</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">District</label>
+          <select name="district" class="form-control" required>
+            {% for dist in kerala_districts %}
+            <option value="{{ dist }}" {% if property.district == dist %}selected{% endif %}>{{ dist }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">City / Town</label>
+          <input type="text" name="city_town" class="form-control" value="{{ property.city_town }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Locality</label>
+          <input type="text" name="locality" class="form-control" value="{{ property.locality }}" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Full Street Address</label>
+        <textarea name="full_address" class="form-control" required>{{ property.full_address }}</textarea>
+      </div>
+
+      <!-- Pricing -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Monthly Rent (₹)</label>
+          <input type="number" name="monthly_rent" class="form-control" value="{{ property.monthly_rent }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Security Deposit (₹)</label>
+          <input type="number" name="security_deposit" class="form-control" value="{{ property.security_deposit }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly Maintenance (₹)</label>
+          <input type="number" name="maintenance_charges" class="form-control" value="{{ property.maintenance_charges }}">
+        </div>
+      </div>
+
+      <!-- Specs -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Bedrooms (BHK)</label>
+          <input type="number" name="bhk" class="form-control" value="{{ property.bhk }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Bathrooms</label>
+          <input type="number" name="bathrooms" class="form-control" value="{{ property.bathrooms }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Area (sq.ft)</label>
+          <input type="number" name="sqft_area" class="form-control" value="{{ property.sqft_area }}" required>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Furnishing</label>
+          <select name="furnishing" class="form-control">
+            <option value="Fully Furnished" {% if property.furnishing == 'Fully Furnished' %}selected{% endif %}>Fully Furnished</option>
+            <option value="Semi-Furnished" {% if property.furnishing == 'Semi-Furnished' %}selected{% endif %}>Semi-Furnished</option>
+            <option value="Unfurnished" {% if property.furnishing == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Parking</label>
+          <input type="text" name="parking" class="form-control" value="{{ property.parking }}" required>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Water Supply</label>
+          <input type="text" name="water_supply" class="form-control" value="{{ property.water_supply }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Electricity & Backup</label>
+          <input type="text" name="electricity" class="form-control" value="{{ property.electricity }}" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Description</label>
+        <textarea name="description" class="form-control" style="min-height: 120px;" required>{{ property.description }}</textarea>
+      </div>
+
+      <!-- Contact Info -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Calling Phone Number</label>
+          <input type="tel" name="contact_phone" class="form-control" value="{{ property.contact_phone }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp Contact Number</label>
+          <input type="tel" name="whatsapp_number" class="form-control" value="{{ property.whatsapp_number }}">
+        </div>
+      </div>
+
+      <!-- Add New Photos -->
+      <div class="form-group">
+        <label class="form-label">Upload Additional Photographs</label>
+        <input type="file" name="new_photos" class="form-control" multiple accept="image/*">
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <button type="submit" class="btn btn-primary-emerald btn-lg" style="flex-grow: 1;">Update Property Details</button>
+        <a href="{{ url_for('owner_dashboard') }}" class="btn btn-ghost btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

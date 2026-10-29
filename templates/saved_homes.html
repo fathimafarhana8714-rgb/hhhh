@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Saved Homes & Favorites | NestKerala{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.25rem 5rem;">
+  <div style="margin-bottom: 2rem;">
+    <span class="section-pretitle">Personal Shortlist</span>
+    <h1 class="section-title">Your Saved Rental Homes</h1>
+    <p class="text-muted">Easily access, compare, and contact owners of properties you have bookmarked.</p>
+  </div>
+
+  {% if saved_properties %}
+  <div class="properties-grid" style="margin-bottom: 3.5rem;">
+    {% for prop in saved_properties %}
+    <article class="property-card">
+      <div class="card-media">
+        <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">
+          <img src="{{ prop.primary_image_url }}" alt="{{ prop.title }}" class="card-img" loading="lazy">
+        </a>
+        <div class="card-top-badges">
+          {% if prop.is_verified %}
+          <span class="badge badge-verified">&check; Verified</span>
+          {% endif %}
+          <span class="badge badge-type">{{ prop.property_type }}</span>
+        </div>
+        <button class="card-action-fav is-active" data-prop-id="{{ prop.id }}" title="Remove from Saved">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+        <div class="card-price-overlay">
+          <div>
+            <span class="card-rent">{{ prop.formatted_rent }}</span>
+            <span class="card-rent-period">/mo</span>
+          </div>
+          <div class="card-deposit">Deposit: {{ prop.formatted_deposit }}</div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="card-location"><span>{{ prop.locality }}, {{ prop.district }}</span></div>
+        <h3 class="card-title">
+          <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a>
+        </h3>
+        <div class="card-specs-row">
+          <div class="spec-item"><span>{{ prop.bhk }} BHK</span></div>
+          <div class="spec-item"><span>{{ prop.sqft_area }} sq.ft</span></div>
+          <div class="spec-item"><span>{{ prop.furnishing }}</span></div>
+        </div>
+        <div class="card-footer">
+          <span class="owner-mini-name">{{ prop.owner_name }}</span>
+          <div class="card-contact-actions">
+            {% if prop.contact_phone %}
+            <a href="tel:{{ prop.contact_phone }}" class="btn-icon-circle btn-call" title="Call">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}" class="btn btn-primary-emerald btn-sm">Details</a>
+          </div>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 4.5rem 2rem; text-align: center; margin-bottom: 3.5rem;">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--primary-700)" stroke-width="1.5" style="margin: 0 auto 1.25rem;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+    <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.6rem;">No saved properties yet</h2>
+    <p class="text-muted" style="max-width: 500px; margin: 0 auto 1.75rem;">
+      Save homes by clicking the heart icon on any listing to build your shortlist.
+    </p>
+    <a href="{{ url_for('properties') }}" class="btn btn-primary-emerald btn-lg">Explore Rental Listings</a>
+  </div>
+  {% endif %}
+
+  <!-- Recently Viewed Properties -->
+  {% if recently_viewed %}
+  <div>
+    <h2 class="section-title" style="font-size: 1.6rem; margin-bottom: 1.25rem;">Recently Viewed by You</h2>
+    <div class="properties-grid">
+      {% for prop in recently_viewed %}
+      <article class="property-card">
+        <div class="card-media">
+          <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">
+            <img src="{{ prop.primary_image_url }}" alt="{{ prop.title }}" class="card-img" loading="lazy">
+          </a>
+          <div class="card-price-overlay">
+            <div>
+              <span class="card-rent">{{ prop.formatted_rent }}</span>
+              <span class="card-rent-period">/mo</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-location"><span>{{ prop.locality }}, {{ prop.district }}</span></div>
+          <h3 class="card-title">
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a>
+          </h3>
+          <div class="card-specs-row">
+            <div class="spec-item"><span>{{ prop.bhk }} BHK</span></div>
+            <div class="spec-item"><span>{{ prop.sqft_area }} sq.ft</span></div>
+          </div>
+          <div class="card-footer">
+            <span class="owner-mini-name">{{ prop.owner_name }}</span>
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}" class="btn btn-outline-emerald btn-sm">Details</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

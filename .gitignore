@@ -1,0 +1,35 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Instance & Database (keep database schema in seed_data / migrations)
+instance/
+*.db
+*.sqlite3
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

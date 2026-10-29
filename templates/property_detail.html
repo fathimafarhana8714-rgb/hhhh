@@ -1,0 +1,628 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ property.title }} – For Rent in {{ property.district }} | NestKerala{% endblock %}
+
+{% block content %}
+<div class="container property-details-container">
+
+  <!-- Breadcrumb -->
+  <nav style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+    <a href="{{ url_for('index') }}" class="text-muted">Home</a> /
+    <a href="{{ url_for('properties', district=property.district) }}" class="text-muted">{{ property.district }}</a> /
+    <a href="{{ url_for('properties', district=property.district, q=property.city_town) }}" class="text-muted">{{ property.city_town }}</a> /
+    <span style="color: var(--text-main); font-weight: 600;">{{ property.property_code }}</span>
+  </nav>
+
+  <!-- Top Title & Pricing Header Block -->
+  <div class="property-header-block">
+    <div class="property-header-left">
+      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span class="prop-code-badge">{{ property.property_code }}</span>
+        {% if property.is_verified %}
+        <span class="badge badge-verified">&check; Verified by NestKerala</span>
+        {% endif %}
+        {% if property.is_sample_demo %}
+        <span class="badge badge-demo">Verified Demonstration Listing</span>
+        {% endif %}
+        <span class="badge badge-type">{{ property.property_type }}</span>
+        <span class="badge" style="background: #E0E7FF; color: #3730A3;">Available: {{ property.availability_date }}</span>
+        <a href="{{ url_for('property_feedback', property_id=property.id) }}" class="badge" style="background: #FEF3C7; color: #92400E; text-decoration: none;" title="Read tenant & visitor feedback">
+          ★ {{ property.average_rating if property.feedback_count > 0 else '5.0' }} ({{ property.feedback_count }} {{ 'Review' if property.feedback_count == 1 else 'Reviews' }})
+        </a>
+      </div>
+
+      <h1 class="prop-main-title">{{ property.title }}</h1>
+      
+      <div class="prop-address-line">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span>{{ property.full_address }}</span>
+      </div>
+    </div>
+
+    <!-- Pricing & Action Pills -->
+    <div class="property-header-pricing">
+      <div class="prop-price-val">{{ property.formatted_rent }}</div>
+      <div class="prop-price-sub">per month ({{ property.formatted_maintenance }})</div>
+      <div class="prop-deposit-badge">Security Deposit: {{ property.formatted_deposit }}</div>
+
+      <!-- Quick Action Buttons -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; justify-content: flex-end; flex-wrap: wrap;">
+        <a href="{{ url_for('property_feedback', property_id=property.id) }}" class="btn btn-secondary-emerald btn-sm" title="View feedback & reviews for this home">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          Feedback ({{ property.feedback_count }})
+        </a>
+        <button class="btn btn-outline-emerald btn-sm btn-fav-toggle {% if property.id in fav_ids %}is-active{% endif %}" data-prop-id="{{ property.id }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          Save
+        </button>
+        <button class="btn btn-outline-emerald btn-sm btn-compare-toggle {% if property.id in compare_ids %}is-active{% endif %}" data-prop-id="{{ property.id }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+          Compare
+        </button>
+        <button class="btn btn-ghost btn-sm btn-share-property" title="Copy shareable link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          Share
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Angle Photo Gallery -->
+  <div class="gallery-layout">
+    <!-- Main Hero Image -->
+    <div class="gallery-primary" onclick="openPhotoModal(0)">
+      <img src="{{ property.primary_image_url }}" alt="{{ property.title }} - Exterior" id="mainGalleryImg">
+      <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.65); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+        Front Exterior & Entrance
+      </div>
+    </div>
+
+    <!-- Side Thumbnails -->
+    <div class="gallery-thumbnails-col">
+      {% if images|length > 1 %}
+      <div class="gallery-thumb-wrap" onclick="openPhotoModal(1)">
+        <img src="{{ images[1].image_url }}" alt="{{ images[1].caption }}">
+        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">
+          {{ images[1].caption }}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if images|length > 2 %}
+      <div class="gallery-thumb-wrap" onclick="openPhotoModal(2)">
+        <img src="{{ images[2].image_url }}" alt="{{ images[2].caption }}">
+        <div class="gallery-counter-overlay">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          View All {{ images|length }} Photos
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Main Details Content 2-Column Grid -->
+  <div class="details-content-grid">
+    <!-- Left Column: Specs, Description, Amenities, Map, Landmarks -->
+    <div class="details-main-column">
+      
+      <!-- Key Specifications Strip -->
+      <div class="specs-card-grid">
+        <div class="spec-box">
+          <div class="spec-box-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          </div>
+          <div>
+            <div class="spec-box-label">Bedrooms</div>
+            <div class="spec-box-val">{{ property.bhk }} BHK</div>
+          </div>
+        </div>
+
+        <div class="spec-box">
+          <div class="spec-box-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21a4 4 0 0 1-4-4V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v12a4 4 0 0 1-4 4zm0 0h12a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-3"></path></svg>
+          </div>
+          <div>
+            <div class="spec-box-label">Bathrooms</div>
+            <div class="spec-box-val">{{ property.bathrooms }} Baths</div>
+          </div>
+        </div>
+
+        <div class="spec-box">
+          <div class="spec-box-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+          </div>
+          <div>
+            <div class="spec-box-label">Super Built-up</div>
+            <div class="spec-box-val">{{ property.sqft_area }} sq.ft</div>
+          </div>
+        </div>
+
+        <div class="spec-box">
+          <div class="spec-box-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+          </div>
+          <div>
+            <div class="spec-box-label">Furnishing</div>
+            <div class="spec-box-val">{{ property.furnishing }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description Block -->
+      <section class="details-card">
+        <h2 class="details-section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          About This Property
+        </h2>
+        <div class="description-text">
+          <p>{{ property.description }}</p>
+        </div>
+      </section>
+
+      <!-- Amenities & Specifications Table -->
+      <section class="details-card">
+        <h2 class="details-section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          Kerala Housing Specifications & Facilities
+        </h2>
+
+        <div class="amenities-table">
+          <div class="amenity-row">
+            <span class="amenity-name">Parking:</span>
+            <span class="amenity-val">{{ property.parking }}</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Water Supply:</span>
+            <span class="amenity-val">{{ property.water_supply }}</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Electricity Backup:</span>
+            <span class="amenity-val">{{ property.electricity }}</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Kitchen Type:</span>
+            <span class="amenity-val">{{ property.kitchen_type }}</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Balcony:</span>
+            <span class="amenity-val">{{ property.balconies }} Private Balcony</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Pet Policy:</span>
+            <span class="amenity-val">{{ property.pet_policy }}</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Tenant Preference:</span>
+            <span class="amenity-val">{{ property.tenant_preference }}</span>
+          </div>
+          <div class="amenity-row">
+            <span class="amenity-name">Availability:</span>
+            <span class="amenity-val">{{ property.availability_date }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Map & Google Maps Integration -->
+      <section class="details-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 class="details-section-title" style="margin-bottom: 0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+            Location & Map Coordinates
+          </h2>
+          {% if property.latitude and property.longitude %}
+          <a href="https://www.google.com/maps/search/?api=1&query={{ property.latitude }},{{ property.longitude }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary-emerald btn-sm">
+            Open in Google Maps
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+          {% endif %}
+        </div>
+        
+        <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">
+          {{ property.locality }}, {{ property.city_town }}, {{ property.district }} &bull; PIN: {{ property.pin_code }}
+        </p>
+
+        <!-- Leaflet Map Canvas -->
+        <div id="propertyMap"></div>
+      </section>
+
+      <!-- Nearby Landmarks with Distances -->
+      {% if landmarks %}
+      <section class="details-card">
+        <h2 class="details-section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Key Nearby Landmarks & Commute
+        </h2>
+        <div class="landmarks-grid">
+          {% for lm in landmarks %}
+          <div class="landmark-item">
+            <span class="landmark-name">{{ lm.name }}</span>
+            <span class="landmark-dist">{{ lm.distance }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Dedicated Tenant & Visitor Feedback Section Block -->
+      <section class="details-card" id="feedbackSection">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h2 class="details-section-title" style="margin-bottom: 0.2rem;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              Tenant & Visitor Feedback ({{ property.feedback_count }})
+            </h2>
+            <div style="font-size: 0.88rem; color: var(--text-muted);">
+              Average rating: <strong style="color: #B45309;">★ {{ property.average_rating if property.feedback_count > 0 else '5.0' }} / 5.0</strong> based on verified tenant experiences
+            </div>
+          </div>
+
+          <a href="{{ url_for('property_feedback', property_id=property.id) }}" class="btn btn-secondary-emerald btn-sm">
+            Open Feedback Page & Write Review &rarr;
+          </a>
+        </div>
+
+        {% set recent_feedbacks = property.feedbacks.filter_by(is_approved=True).limit(3).all() %}
+        {% if recent_feedbacks %}
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+          {% for fb in recent_feedbacks %}
+          <div style="background: var(--bg-cream); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1.1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <div>
+                <strong>{{ fb.reviewer_name }}</strong>
+                <span class="badge" style="background: #E8F4F0; color: #0F4C3A; font-size: 0.7rem; margin-left: 0.35rem;">{{ fb.visit_type }}</span>
+              </div>
+              <span style="color: #F59E0B; font-weight: 700; font-size: 0.95rem;">
+                {% for i in range(fb.rating) %}★{% endfor %}
+              </span>
+            </div>
+            {% if fb.headline %}
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--primary-900); margin-bottom: 0.25rem;">
+              "{{ fb.headline }}"
+            </div>
+            {% endif %}
+            <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 0.5rem; line-height: 1.5;">
+              {{ fb.comment }}
+            </p>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              💧 Water: {{ fb.water_rating }}/5 &bull; 📍 Location: {{ fb.location_rating }}/5 &bull; 🤝 Landlord: {{ fb.landlord_rating }}/5 &bull; Reviewed on {{ fb.created_at.strftime('%d %b %Y') }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div style="margin-top: 1.25rem; text-align: center;">
+          <a href="{{ url_for('property_feedback', property_id=property.id) }}" class="btn btn-outline-emerald btn-sm">
+            View All {{ property.feedback_count }} Reviews & Leave Your Feedback
+          </a>
+        </div>
+        {% else %}
+        <div style="background: var(--bg-cream); border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding: 1.75rem; text-align: center;">
+          <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">
+            No feedback reviews posted yet for this property.
+          </p>
+          <a href="{{ url_for('property_feedback', property_id=property.id) }}" class="btn btn-primary-emerald btn-sm">
+            Be the First to Add Feedback for this Home
+          </a>
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- Report Listing Option -->
+      <div style="text-align: right; margin-top: 1rem;">
+        <button class="btn btn-ghost btn-sm text-muted" data-open-modal="reportModal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+          Report this listing for review
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: Dedicated Owner Contact Card -->
+    <aside class="details-sidebar">
+      <div class="owner-contact-card">
+        <div class="owner-profile-header">
+          <div class="owner-avatar-lg">
+            {{ property.owner_name[:1].upper() }}
+          </div>
+          <div>
+            <div class="owner-card-name">{{ property.owner_name }}</div>
+            <div class="owner-card-type">{{ property.owner_contact_type }}</div>
+            <div class="verified-shield">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Authorized & Verified
+            </div>
+          </div>
+        </div>
+
+        <!-- Direct Actions -->
+        <div class="owner-action-buttons">
+          {% if property.contact_phone %}
+          <a href="tel:{{ property.contact_phone }}" class="btn btn-call btn-block">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            Call Owner: {{ property.contact_phone }}
+          </a>
+          {% else %}
+          <div class="text-muted" style="text-align: center; font-size: 0.9rem;">Contact Not Available</div>
+          {% endif %}
+
+          {% if property.whatsapp_number %}
+          <a href="https://wa.me/{{ property.whatsapp_number|replace(' ', '')|replace('+', '') }}?text=Hello%20{{ property.owner_name }},%20I%20am%20interested%20in%20your%20property%20{{ property.title }}%20(ID:%20{{ property.property_code }})%20on%20NestKerala." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-block">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"></path></svg>
+            Chat on WhatsApp
+          </a>
+          {% endif %}
+
+          <button class="btn btn-primary-emerald btn-block" data-open-modal="enquiryModal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            Send Direct Enquiry
+          </button>
+
+          <button class="btn btn-secondary-emerald btn-block" data-open-modal="visitModal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Request Property Visit
+          </button>
+
+          <a href="{{ url_for('property_feedback', property_id=property.id) }}" class="btn btn-outline-emerald btn-block">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            Tenant Feedback & Ratings ({{ property.feedback_count }})
+          </a>
+        </div>
+
+        <div style="background: var(--bg-cream); padding: 1rem; border-radius: var(--radius-sm); font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          <strong>NestKerala Guarantee:</strong> You are communicating directly with the registered owner or authorized agent. Never transfer advance token amounts before visiting the house in person.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Similar Properties in this Region -->
+  {% if similar_properties %}
+  <section style="margin-top: 4.5rem;">
+    <h2 class="section-title" style="margin-bottom: 1.5rem; font-size: 1.75rem;">Similar Rental Homes in {{ property.district }}</h2>
+    <div class="properties-grid">
+      {% for sprop in similar_properties %}
+      <article class="property-card">
+        <div class="card-media">
+          <a href="{{ url_for('property_detail', property_id=sprop.id, slug=sprop.slug) }}">
+            <img src="{{ sprop.primary_image_url }}" alt="{{ sprop.title }}" class="card-img" loading="lazy">
+          </a>
+          <div class="card-price-overlay">
+            <div>
+              <span class="card-rent">{{ sprop.formatted_rent }}</span>
+              <span class="card-rent-period">/mo</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-location"><span>{{ sprop.locality }}, {{ sprop.district }}</span></div>
+          <h3 class="card-title">
+            <a href="{{ url_for('property_detail', property_id=sprop.id, slug=sprop.slug) }}">{{ sprop.title }}</a>
+          </h3>
+          <div class="card-specs-row">
+            <div class="spec-item"><span>{{ sprop.bhk }} BHK</span></div>
+            <div class="spec-item"><span>{{ sprop.sqft_area }} sq.ft</span></div>
+          </div>
+          <div class="card-footer">
+            <span class="owner-mini-name">{{ sprop.owner_name }}</span>
+            <a href="{{ url_for('property_detail', property_id=sprop.id, slug=sprop.slug) }}" class="btn btn-outline-emerald btn-sm">Details</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+<!-- ==============================================================
+     MODAL 1: Send Enquiry Modal
+     ============================================================== -->
+<div class="modal-backdrop" id="enquiryModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Send Enquiry to {{ property.owner_name }}</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form action="{{ url_for('submit_enquiry', property_id=property.id) }}" method="POST">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label required">Your Full Name</label>
+          <input type="text" name="sender_name" class="form-control" value="{{ current_user.full_name if current_user else '' }}" required placeholder="e.g. Rahul Nair">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Mobile Number</label>
+          <input type="tel" name="sender_phone" class="form-control" value="{{ current_user.phone if current_user else '' }}" required placeholder="+91 98470 XXXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="sender_email" class="form-control" value="{{ current_user.email if current_user else '' }}" placeholder="name@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tenant Profile</label>
+          <select name="tenant_type" class="form-control">
+            <option value="Family">Family</option>
+            <option value="Working Professional">Working Professional</option>
+            <option value="Group of Bachelors">Group of Bachelors</option>
+            <option value="Company / Corporate">Company / Corporate Lease</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expected Move-in Date</label>
+          <input type="text" name="move_in_date" class="form-control" placeholder="e.g. Immediate / Next Month 1st">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Message to Owner</label>
+          <textarea name="message" class="form-control" required placeholder="Introduce yourself and mention any specific questions regarding the home...">Hello {{ property.owner_name }}, I am interested in renting your property {{ property.title }} in {{ property.locality }}. Please let me know when we can connect.</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary-emerald btn-block">Send Enquiry Now</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==============================================================
+     MODAL 2: Request Property Visit Modal
+     ============================================================== -->
+<div class="modal-backdrop" id="visitModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Schedule a Property Viewing</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form action="{{ url_for('schedule_visit', property_id=property.id) }}" method="POST">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label required">Your Name</label>
+          <input type="text" name="visitor_name" class="form-control" value="{{ current_user.full_name if current_user else '' }}" required placeholder="e.g. Rahul Nair">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Mobile Number</label>
+          <input type="tel" name="visitor_phone" class="form-control" value="{{ current_user.phone if current_user else '' }}" required placeholder="+91 98470 XXXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="visitor_email" class="form-control" value="{{ current_user.email if current_user else '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Preferred Visit Date</label>
+          <input type="date" name="preferred_date" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Preferred Time Slot</label>
+          <select name="preferred_time_slot" class="form-control">
+            <option value="Morning (9:00 AM - 12:00 PM)">Morning (9:00 AM - 12:00 PM)</option>
+            <option value="Afternoon (1:00 PM - 4:00 PM)">Afternoon (1:00 PM - 4:00 PM)</option>
+            <option value="Evening (4:00 PM - 7:00 PM)">Evening (4:00 PM - 7:00 PM)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes for Owner</label>
+          <textarea name="notes" class="form-control" placeholder="Visiting with family members / need directions..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-secondary-emerald btn-block">Confirm Appointment Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==============================================================
+     MODAL 3: Report Listing Modal
+     ============================================================== -->
+<div class="modal-backdrop" id="reportModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Report Property Listing</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form action="{{ url_for('report_property', property_id=property.id) }}" method="POST">
+      <div class="modal-body">
+        <p class="text-muted" style="font-size: 0.88rem; margin-bottom: 1rem;">
+          Help us maintain 100% authentic listings across Kerala. Our quality moderation team investigates every report.
+        </p>
+        <div class="form-group">
+          <label class="form-label required">Your Name</label>
+          <input type="text" name="reporter_name" class="form-control" value="{{ current_user.full_name if current_user else '' }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Email</label>
+          <input type="email" name="reporter_email" class="form-control" value="{{ current_user.email if current_user else '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Reason for Report</label>
+          <select name="reason" class="form-control" required>
+            <option value="Inaccurate Details">Inaccurate Address or Pricing</option>
+            <option value="Property Already Rented">Property is already rented out</option>
+            <option value="Incorrect Phone Number">Invalid / Unreachable phone number</option>
+            <option value="Fraud / Suspicious">Suspicious behaviour / demanding token</option>
+            <option value="Other">Other discrepancy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Detailed Explanation</label>
+          <textarea name="details" class="form-control" required placeholder="Please provide specific information..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger-soft btn-block">Submit Report</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==============================================================
+     MODAL 4: Full-Screen Photo Lightbox
+     ============================================================== -->
+<div class="modal-backdrop" id="photoLightboxModal">
+  <div class="modal-box" style="max-width: 900px; background: #000; color: white;">
+    <div class="modal-header" style="border-bottom: 1px solid #333;">
+      <h4 id="lightboxCaption" style="color: white; font-size: 1.1rem;">Property View</h4>
+      <button class="modal-close-btn" style="color: white;">&times;</button>
+    </div>
+    <div style="padding: 1rem; text-align: center; position: relative;">
+      <img id="lightboxActiveImg" src="" alt="Property Photo" style="max-height: 70vh; margin: 0 auto; border-radius: 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+        <button class="btn btn-ghost" style="color: white;" onclick="navigateLightbox(-1)">&larr; Previous</button>
+        <span id="lightboxIndexIndicator" style="font-size: 0.9rem; color: #94A3B8;">1 / 1</span>
+        <button class="btn btn-ghost" style="color: white;" onclick="navigateLightbox(1)">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Initialize Leaflet Map for this property
+  document.addEventListener('DOMContentLoaded', () => {
+    const lat = {{ property.latitude or 10.0 }};
+    const lng = {{ property.longitude or 76.3 }};
+    const title = {{ property.title|tojson }};
+    const address = {{ property.full_address|tojson }};
+
+    const map = L.map('propertyMap').setView([lat, lng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Custom Kerala Emerald Marker
+    const marker = L.circleMarker([lat, lng], {
+      color: '#0F4C3A',
+      fillColor: '#10B981',
+      fillOpacity: 0.85,
+      radius: 10,
+      weight: 3
+    }).addTo(map);
+
+    marker.bindPopup(`<strong>${title}</strong><br><small>${address}</small>`).openPopup();
+  });
+
+  // Photo Lightbox Data & Navigation
+  const photosData = [
+    {% for img in images %}
+    { url: {{ img.image_url|tojson }}, caption: {{ img.caption|tojson }} },
+    {% endfor %}
+  ];
+  let currentLightboxIdx = 0;
+
+  function openPhotoModal(idx) {
+    if (!photosData || photosData.length === 0) return;
+    currentLightboxIdx = idx % photosData.length;
+    renderLightbox();
+    const modal = document.getElementById('photoLightboxModal');
+    if (modal) {
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function navigateLightbox(step) {
+    currentLightboxIdx = (currentLightboxIdx + step + photosData.length) % photosData.length;
+    renderLightbox();
+  }
+
+  function renderLightbox() {
+    const item = photosData[currentLightboxIdx];
+    document.getElementById('lightboxActiveImg').src = item.url;
+    document.getElementById('lightboxCaption').textContent = item.caption;
+    document.getElementById('lightboxIndexIndicator').textContent = `${currentLightboxIdx + 1} of ${photosData.length}`;
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}Rental Properties in Kerala | NestKerala Search{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="search-page-layout">
+    <!-- Filter Sidebar -->
+    <aside class="filters-sidebar">
+      <form action="{{ url_for('properties') }}" method="GET" id="searchFiltersForm">
+        <div class="filters-header">
+          <span class="filters-title">Filter Properties</span>
+          <a href="{{ url_for('properties') }}" class="btn btn-ghost btn-sm text-muted">Reset All</a>
+        </div>
+
+        <!-- District Filter -->
+        <div class="filter-group">
+          <div class="filter-group-title">Kerala District</div>
+          <select name="district" class="form-control" onchange="this.form.submit()">
+            <option value="">All 14 Districts</option>
+            {% for dist in kerala_districts %}
+            <option value="{{ dist }}" {% if selected_district == dist %}selected{% endif %}>{{ dist }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Locality / Search Keyword -->
+        <div class="filter-group">
+          <div class="filter-group-title">Town / Locality</div>
+          <input type="text" name="q" value="{{ query_text }}" placeholder="e.g. Kakkanad, Kowdiar" class="form-control">
+        </div>
+
+        <!-- Bedrooms / BHK -->
+        <div class="filter-group">
+          <div class="filter-group-title">Bedrooms (BHK)</div>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="bhk" value="" {% if not selected_bhk %}checked{% endif %} onchange="this.form.submit()">
+            Any BHK
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="bhk" value="1" {% if selected_bhk == '1' %}checked{% endif %} onchange="this.form.submit()">
+            1 BHK
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="bhk" value="2" {% if selected_bhk == '2' %}checked{% endif %} onchange="this.form.submit()">
+            2 BHK
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="bhk" value="3" {% if selected_bhk == '3' %}checked{% endif %} onchange="this.form.submit()">
+            3 BHK
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="bhk" value="4" {% if selected_bhk == '4' %}checked{% endif %} onchange="this.form.submit()">
+            4+ BHK Villa
+          </label>
+        </div>
+
+        <!-- Monthly Budget Range -->
+        <div class="filter-group">
+          <div class="filter-group-title">Monthly Rent Range (₹)</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="number" name="min_rent" value="{{ min_rent }}" placeholder="Min ₹" class="form-control" step="1000">
+            <input type="number" name="max_rent" value="{{ max_rent }}" placeholder="Max ₹" class="form-control" step="1000">
+          </div>
+        </div>
+
+        <!-- Property Type -->
+        <div class="filter-group">
+          <div class="filter-group-title">Property Type</div>
+          <select name="property_type" class="form-control" onchange="this.form.submit()">
+            <option value="">Any Type</option>
+            <option value="Independent Villa" {% if selected_type == 'Independent Villa' %}selected{% endif %}>Independent Villa</option>
+            <option value="Traditional Kerala Nalukettu" {% if selected_type == 'Traditional Kerala Nalukettu' %}selected{% endif %}>Traditional Nalukettu</option>
+            <option value="Modern Apartment" {% if selected_type == 'Modern Apartment' %}selected{% endif %}>Modern Apartment</option>
+            <option value="Gated Community Villa" {% if selected_type == 'Gated Community Villa' %}selected{% endif %}>Gated Community Villa</option>
+          </select>
+        </div>
+
+        <!-- Furnishing -->
+        <div class="filter-group">
+          <div class="filter-group-title">Furnishing Status</div>
+          <select name="furnishing" class="form-control" onchange="this.form.submit()">
+            <option value="">Any Furnishing</option>
+            <option value="Fully Furnished" {% if selected_furnishing == 'Fully Furnished' %}selected{% endif %}>Fully Furnished</option>
+            <option value="Semi-Furnished" {% if selected_furnishing == 'Semi-Furnished' %}selected{% endif %}>Semi-Furnished</option>
+            <option value="Unfurnished" {% if selected_furnishing == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
+          </select>
+        </div>
+
+        <!-- Preferences Checkboxes -->
+        <div class="filter-group">
+          <div class="filter-group-title">Preferences & Verification</div>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" name="verified_only" value="1" {% if verified_only == '1' %}checked{% endif %} onchange="this.form.submit()">
+            Verified Listings Only
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" name="pet_friendly" value="1" {% if pet_friendly == '1' %}checked{% endif %} onchange="this.form.submit()">
+            Pet-Friendly Properties
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary-emerald btn-block mt-3">
+          Apply Filters
+        </button>
+      </form>
+    </aside>
+
+    <!-- Results Section -->
+    <main class="results-main-area">
+      <!-- Results Header Bar -->
+      <div class="results-header-bar">
+        <div>
+          <h1 class="results-count">
+            {% if selected_district %}
+              {{ exact_matches_count }} {{ 'Rental Home' if exact_matches_count == 1 else 'Rental Homes' }} in {{ selected_district }}
+            {% else %}
+              {{ exact_matches_count }} Verified Rental Properties in Kerala
+            {% endif %}
+          </h1>
+          {% if query_text %}
+          <small class="text-muted">Filtered by keyword: "{{ query_text }}"</small>
+          {% endif %}
+        </div>
+
+        <div class="results-sorting">
+          <label for="sortSelect">Sort By:</label>
+          <select id="sortSelect" class="sort-select" onchange="updateSort(this.value)">
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest Listings</option>
+            <option value="lowest_rent" {% if sort_by == 'lowest_rent' %}selected{% endif %}>Lowest Rent</option>
+            <option value="highest_rent" {% if sort_by == 'highest_rent' %}selected{% endif %}>Highest Rent</option>
+            <option value="area_desc" {% if sort_by == 'area_desc' %}selected{% endif %}>Largest Area (sq.ft)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Properties Grid (Exact Matches) -->
+      {% if exact_matches_count > 0 %}
+      <div class="properties-grid">
+        {% for prop in properties %}
+        <article class="property-card">
+          <div class="card-media">
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">
+              <img src="{{ prop.primary_image_url }}" alt="{{ prop.title }}" class="card-img" loading="lazy">
+            </a>
+            <div class="card-top-badges">
+              {% if prop.is_verified %}
+              <span class="badge badge-verified">&check; Verified</span>
+              {% endif %}
+              {% if prop.is_sample_demo %}
+              <span class="badge badge-demo">Sample Listing</span>
+              {% endif %}
+              <span class="badge badge-type">{{ prop.property_type }}</span>
+            </div>
+
+            <button class="card-action-fav {% if prop.id in fav_ids %}is-active{% endif %}" data-prop-id="{{ prop.id }}" aria-label="Save">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+
+            <button class="card-action-compare {% if prop.id in compare_ids %}is-active{% endif %}" data-prop-id="{{ prop.id }}" aria-label="Compare">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+            </button>
+
+            <div class="card-price-overlay">
+              <div>
+                <span class="card-rent">{{ prop.formatted_rent }}</span>
+                <span class="card-rent-period">/mo</span>
+              </div>
+              <div class="card-deposit">Deposit: {{ prop.formatted_deposit }}</div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-location" style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>{{ prop.locality }}, {{ prop.district }}</span>
+              </div>
+              <a href="{{ url_for('property_feedback', property_id=prop.id) }}" style="color: #B45309; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Tenant Feedback & Reviews">
+                ★ {{ prop.average_rating if prop.feedback_count > 0 else '5.0' }} ({{ prop.feedback_count }})
+              </a>
+            </div>
+
+            <h3 class="card-title">
+              <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a>
+            </h3>
+
+            <div class="card-specs-row">
+              <div class="spec-item"><span>{{ prop.bhk }} BHK</span></div>
+              <div class="spec-item"><span>{{ prop.bathrooms }} Baths</span></div>
+              <div class="spec-item"><span>{{ prop.sqft_area }} sq.ft</span></div>
+              <div class="spec-item"><span>{{ prop.furnishing }}</span></div>
+            </div>
+
+            <div class="card-footer">
+              <div class="owner-mini-info">
+                <span class="owner-mini-name">{{ prop.owner_name }}</span>
+                <span class="owner-mini-type">{{ prop.owner_contact_type }}</span>
+              </div>
+              <div class="card-contact-actions">
+                {% if prop.contact_phone %}
+                <a href="tel:{{ prop.contact_phone }}" class="btn-icon-circle btn-call" title="Call Owner">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </a>
+                {% endif %}
+                {% if prop.whatsapp_number %}
+                <a href="https://wa.me/{{ prop.whatsapp_number|replace(' ', '')|replace('+', '') }}?text=Hi%20{{ prop.owner_name }},%20inquiring%20about%20{{ prop.title }}%20(ID:%20{{ prop.property_code }})" target="_blank" rel="noopener noreferrer" class="btn-icon-circle btn-whatsapp" title="WhatsApp">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"></path></svg>
+                </a>
+                {% endif %}
+                <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}" class="btn btn-outline-emerald btn-sm">
+                  Details
+                </a>
+              </div>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- SMART RECOMMENDATION SYSTEM: Shown when exact matches are 0 or low -->
+      {% if recommended_properties %}
+      <div class="recommendation-banner">
+        <div class="rec-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          No Exact Matches – Similar Homes You May Like
+        </div>
+        <p class="rec-desc">
+          {% if exact_matches_count == 0 %}
+          We could not find an exact match for your specific filters. Based on your budget, room preferences, and neighboring Kerala regions, here are closely matching alternatives:
+          {% else %}
+          Looking for more options? Here are similar recommended rental homes in neighboring areas:
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="properties-grid">
+        {% for prop in recommended_properties %}
+        <article class="property-card" style="border-top: 3px solid var(--gold-500);">
+          <div class="card-media">
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">
+              <img src="{{ prop.primary_image_url }}" alt="{{ prop.title }}" class="card-img" loading="lazy">
+            </a>
+            <div class="card-top-badges">
+              <span class="badge" style="background-color: var(--gold-500); color: black;">Smart Match</span>
+              <span class="badge badge-type">{{ prop.property_type }}</span>
+            </div>
+
+            <button class="card-action-fav {% if prop.id in fav_ids %}is-active{% endif %}" data-prop-id="{{ prop.id }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+
+            <div class="card-price-overlay">
+              <div>
+                <span class="card-rent">{{ prop.formatted_rent }}</span>
+                <span class="card-rent-period">/mo</span>
+              </div>
+              <div class="card-deposit">Deposit: {{ prop.formatted_deposit }}</div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-location" style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>{{ prop.locality }}, {{ prop.district }}</span>
+              </div>
+              <a href="{{ url_for('property_feedback', property_id=prop.id) }}" style="color: #B45309; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Tenant Feedback & Reviews">
+                ★ {{ prop.average_rating if prop.feedback_count > 0 else '5.0' }} ({{ prop.feedback_count }})
+              </a>
+            </div>
+
+            <h3 class="card-title">
+              <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a>
+            </h3>
+
+            <div class="card-specs-row">
+              <div class="spec-item"><span>{{ prop.bhk }} BHK</span></div>
+              <div class="spec-item"><span>{{ prop.sqft_area }} sq.ft</span></div>
+              <div class="spec-item"><span>{{ prop.furnishing }}</span></div>
+            </div>
+
+            <div class="card-footer">
+              <div class="owner-mini-info">
+                <span class="owner-mini-name">{{ prop.owner_name }}</span>
+              </div>
+              <div class="card-contact-actions">
+                <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}" class="btn btn-primary-emerald btn-sm">
+                  View Match
+                </a>
+              </div>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if exact_matches_count == 0 and not recommended_properties %}
+      <div style="background: white; padding: 4rem 2rem; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border-light);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.5" style="margin: 0 auto 1rem;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h3>No properties available yet for this combination</h3>
+        <p class="text-muted" style="margin: 0.5rem 0 1.5rem;">Try clearing some filters or searching in adjacent districts.</p>
+        <a href="{{ url_for('properties') }}" class="btn btn-primary-emerald">View All Available Kerala Rentals</a>
+      </div>
+      {% endif %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function updateSort(val) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', val);
+    window.location.href = url.toString();
+  }
+</script>
+{% endblock %}

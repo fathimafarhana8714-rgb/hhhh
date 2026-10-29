@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In to NestKerala | Kerala's Rental Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 480px; padding: 4rem 1.25rem 6rem;">
+  <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-md);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NestKerala" height="42" style="margin: 0 auto 1rem;">
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--primary-900);">Sign In to NestKerala</h1>
+      <p class="text-muted" style="font-size: 0.9rem;">Access your saved properties, owner dashboard, and enquiries.</p>
+    </div>
+
+    <form action="{{ url_for('login') }}" method="POST">
+      <div class="form-group">
+        <label class="form-label required">Email Address</label>
+        <input type="email" name="email" id="loginEmail" class="form-control" required placeholder="name@example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Password</label>
+        <input type="password" name="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="btn btn-primary-emerald btn-block btn-lg" style="margin-top: 1.5rem;">
+        Sign In
+      </button>
+    </form>
+
+    <!-- Quick Demo Logins for Instant Testing -->
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);">
+      <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; text-align: center;">
+        Quick Demonstration One-Click Logins
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <button type="button" class="btn btn-outline-emerald btn-sm" onclick="quickFill('admin@nestkerala.com', 'Admin@123')">
+          Demo Admin (Approvals, Moderation, Metrics)
+        </button>
+        <button type="button" class="btn btn-secondary-emerald btn-sm" onclick="quickFill('kr.menon@keralahomes.in', 'Owner@123')">
+          Demo Property Owner (Kakkanad & Nadakkavu Villas)
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm" style="border: 1px solid var(--border-light);" onclick="quickFill('rahul.nair@techkerala.com', 'Tenant@123')">
+          Demo Tenant (Rahul Nair - Enquiries & Visits)
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+      Don't have an account? <a href="{{ url_for('register') }}" style="font-weight: 700;">Register here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function quickFill(email, pwd) {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = pwd;
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}List Your Rental Property in Kerala | NestKerala Free Owner Submission{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding: 3rem 1.25rem 5rem;">
+  <div style="margin-bottom: 2rem;">
+    <span class="section-pretitle">For Kerala Property Owners & Agents</span>
+    <h1 class="section-title">List Your Rental Property on NestKerala</h1>
+    <p class="text-muted">Reach genuine tenants across Kerala. Direct phone and WhatsApp communication with zero brokerage commissions.</p>
+  </div>
+
+  <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-sm);">
+    <form action="{{ url_for('list_property') }}" method="POST" enctype="multipart/form-data">
+      
+      <!-- Section 1: Basic Information -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem;">
+        1. Basic Property Details
+      </h3>
+
+      <div class="form-group">
+        <label class="form-label required">Property Headline / Title</label>
+        <input type="text" name="title" class="form-control" required placeholder="e.g. Spacious 3 BHK Villa with Garden & Covered Car Porch">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Property Type</label>
+          <select name="property_type" class="form-control" required>
+            <option value="Independent Villa">Independent Villa</option>
+            <option value="Traditional Kerala Nalukettu">Traditional Kerala Nalukettu</option>
+            <option value="Modern Apartment">Modern Apartment / Flat</option>
+            <option value="Gated Community Villa">Gated Community Villa</option>
+            <option value="Builder Floor">Builder Floor</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Bedrooms (BHK)</label>
+          <select name="bhk" class="form-control" required>
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3" selected>3 BHK</option>
+            <option value="4">4 BHK</option>
+            <option value="5">5+ BHK</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Bathrooms</label>
+          <input type="number" name="bathrooms" value="3" min="1" max="10" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Balconies</label>
+          <input type="number" name="balconies" value="1" min="0" max="6" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Total Area (Sq. Ft.)</label>
+          <input type="number" name="sqft_area" placeholder="e.g. 1850" class="form-control" required>
+        </div>
+      </div>
+
+      <!-- Section 2: Location -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin: 2rem 0 1.5rem;">
+        2. Location in Kerala
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">District</label>
+          <select name="district" class="form-control" required>
+            <option value="">Select District</option>
+            {% for dist in kerala_districts %}
+            <option value="{{ dist }}">{{ dist }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">City / Town</label>
+          <input type="text" name="city_town" class="form-control" required placeholder="e.g. Kochi, Thiruvananthapuram, Calicut">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Locality / Landmark Area</label>
+          <input type="text" name="locality" class="form-control" required placeholder="e.g. Near Infopark, Kakkanad or Kowdiar">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">PIN Code</label>
+          <input type="text" name="pin_code" class="form-control" required placeholder="e.g. 682030">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Full Street Address</label>
+        <textarea name="full_address" class="form-control" required placeholder="House name/number, street name, post office..."></textarea>
+      </div>
+
+      <!-- Section 3: Pricing & Availability -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin: 2rem 0 1.5rem;">
+        3. Rental Pricing & Availability
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Monthly Rent (₹)</label>
+          <input type="number" name="monthly_rent" class="form-control" required placeholder="e.g. 25000">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Security Deposit (₹)</label>
+          <input type="number" name="security_deposit" class="form-control" required placeholder="e.g. 75000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly Maintenance (₹)</label>
+          <input type="number" name="maintenance_charges" value="0" class="form-control" placeholder="0 if included">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Availability Date</label>
+          <input type="text" name="availability_date" class="form-control" required value="Immediate" placeholder="e.g. Immediate / Ready to move / 1st Next Month">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Tenant Preference</label>
+          <select name="tenant_preference" class="form-control" required>
+            <option value="Family Preferred">Family Preferred</option>
+            <option value="Family or Working Professionals">Family or Working Professionals</option>
+            <option value="Working Bachelors Allowed">Working Bachelors Allowed</option>
+            <option value="Any Suitable Tenant">Any Suitable Tenant</option>
+            <option value="Corporate Lease">Corporate Lease</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Section 4: Specifications & Utilities -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin: 2rem 0 1.5rem;">
+        4. Infrastructure & Amenities
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Furnishing Status</label>
+          <select name="furnishing" class="form-control" required>
+            <option value="Semi-Furnished">Semi-Furnished</option>
+            <option value="Fully Furnished">Fully Furnished</option>
+            <option value="Unfurnished">Unfurnished</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Parking Facility</label>
+          <select name="parking" class="form-control" required>
+            <option value="Covered Car Parking">Covered Car Parking (1 Car)</option>
+            <option value="Multiple Covered Cars (2 Cars)">Multiple Covered Cars (2 Cars)</option>
+            <option value="Open Car Parking">Open Car Parking</option>
+            <option value="Two-Wheeler Only">Two-Wheeler Only</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Water Availability</label>
+          <select name="water_supply" class="form-control" required>
+            <option value="24x7 KWA Connection + Purified Open Well">24x7 KWA Connection + Open Well</option>
+            <option value="24x7 Dedicated Open Well Water">Dedicated Open Well Water</option>
+            <option value="24x7 Treated KWA Corporation Supply">24x7 Treated KWA Corporation Supply</option>
+            <option value="Pure Borewell Water + Purifier">Pure Borewell Water + Purifier</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Electricity & Power Backup</label>
+          <select name="electricity" class="form-control" required>
+            <option value="3-Phase KSEB with Inverter Backup">3-Phase KSEB with Inverter Backup</option>
+            <option value="3-Phase KSEB with Solar Hybrid System">3-Phase KSEB with Solar Hybrid System</option>
+            <option value="Standard KSEB Connection">Standard KSEB Connection</option>
+            <option value="100% Full Generator Power Backup">100% Full Generator Power Backup</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Kitchen Type</label>
+          <select name="kitchen_type" class="form-control" required>
+            <option value="Modular Kitchen with Work Area">Modular Kitchen with Work Area</option>
+            <option value="Modular Kitchen with Chimney">Modular Kitchen with Chimney</option>
+            <option value="Traditional Kitchen with Modern Counter">Traditional Kitchen with Modern Counter</option>
+            <option value="Standard Kitchen">Standard Kitchen</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Pet Policy</label>
+          <select name="pet_policy" class="form-control" required>
+            <option value="Pets Allowed">Pets Allowed</option>
+            <option value="Small Pets Only">Small Pets Only</option>
+            <option value="No Pets Allowed">No Pets Allowed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Comprehensive Property Description</label>
+        <textarea name="description" class="form-control" style="min-height: 120px;" required placeholder="Describe the layout, neighborhood, ventilation, proximity to road, security, garden, etc."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nearby Landmarks (Format: Name: Distance | Name: Distance)</label>
+        <input type="text" name="nearby_landmarks" class="form-control" placeholder="e.g. Infopark Phase 1: 1.8 km | Rajagiri Hospital: 3.5 km | Metro Station: 1.2 km">
+      </div>
+
+      <!-- Section 5: Real Photographs Upload -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin: 2rem 0 1.5rem;">
+        5. Real Property Photographs
+      </h3>
+
+      <div class="form-group">
+        <label class="form-label required">Upload House Photographs (Select multiple photos: Exterior, Living, Bedrooms, Kitchen, Bathrooms)</label>
+        <input type="file" name="property_photos" class="form-control" multiple accept="image/png, image/jpeg, image/jpg, image/webp">
+        <small class="text-muted" style="display: block; margin-top: 0.35rem;">
+          Supported formats: JPG, PNG, WEBP. First image will be used as the primary card photo.
+        </small>
+      </div>
+
+      <!-- Section 6: Owner Contact Information -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); margin: 2rem 0 1.5rem;">
+        6. Authorized Owner / Agent Contact Information
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Full Name</label>
+          <input type="text" name="owner_name" class="form-control" value="{{ current_user.full_name if current_user else '' }}" required placeholder="e.g. K. R. Menon">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Listing Role</label>
+          <select name="owner_contact_type" class="form-control">
+            <option value="Individual Owner">Individual Homeowner</option>
+            <option value="Authorized Agent">Authorized Real Estate Agent</option>
+            <option value="Builder / Property Manager">Builder / Property Manager</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label required">Calling Mobile Number</label>
+          <input type="tel" name="contact_phone" class="form-control" value="{{ current_user.phone if current_user else '' }}" required placeholder="+91 98470 XXXXX">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">WhatsApp Contact Number</label>
+          <input type="tel" name="whatsapp_number" class="form-control" value="{{ current_user.phone if current_user else '' }}" placeholder="+91 98470 XXXXX">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="contact_email" class="form-control" value="{{ current_user.email if current_user else '' }}" placeholder="owner@example.com">
+        </div>
+      </div>
+
+      <div style="background: var(--bg-cream); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin: 1.5rem 0;">
+        <div style="font-weight: 700; color: var(--primary-900); font-size: 0.9rem; margin-bottom: 0.25rem;">
+          NestKerala Integrity Notice:
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+          By submitting this property, you confirm that you are the lawful owner or authorized agent. Newly submitted properties are reviewed by our platform administrators to verify telephone contact and photo quality before public activation.
+        </p>
+      </div>
+
+      <button type="submit" class="btn btn-primary-emerald btn-lg btn-block">
+        Submit Rental Listing for Free
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

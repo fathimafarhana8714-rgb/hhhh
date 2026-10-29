@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}NestKerala – Find Your Perfect Home in Kerala | Premium Rental Marketplace{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Advanced Property Search -->
+<section class="hero-section">
+  <div class="container hero-content">
+    <div class="hero-badge-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      <span class="en-text">Kerala's Premier Rental Property Network</span>
+      <span class="ml-text">കേരളത്തിലെ മുൻനിര വാടക വീടുകളുടെ പ്ലാറ്റ്‌ഫോം</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="en-text">Find Your <span class="highlight-gold">Perfect Home</span> in Kerala</span>
+      <span class="ml-text">കേരളത്തിൽ നിങ്ങളുടെ <span class="highlight-gold">സ്വപ്ന ഭവനം</span> കണ്ടെത്തൂ</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      <span class="en-text">Explore verified villas, traditional nalukettu residences, and modern apartments across all 14 districts with direct owner contact.</span>
+      <span class="ml-text">എല്ലാ 14 ജില്ലകളിലുമുള്ള വില്ലകൾ, പരമ്പരാഗത നാലുകെട്ടുകൾ, മോഡേൺ ഫ്ലാറ്റുകൾ എന്നിവ നേരിട്ട് ഉടമകളെ വിളിച്ച് വാടകയ്ക്ക് എടുക്കാം.</span>
+    </p>
+
+    <!-- Master Search Card -->
+    <div class="search-card-wrapper">
+      <form action="{{ url_for('properties') }}" method="GET" class="search-form-grid">
+        <!-- District Selector -->
+        <div class="search-field-group">
+          <label class="search-label" for="districtSelect">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span class="en-text">District</span>
+            <span class="ml-text">ജില്ല</span>
+          </label>
+          <select name="district" id="districtSelect" class="search-select">
+            <option value="">All 14 Districts</option>
+            {% for dist in kerala_districts %}
+            <option value="{{ dist }}">{{ dist }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Locality / Town Query -->
+        <div class="search-field-group">
+          <label class="search-label" for="queryInput">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span class="en-text">Town / Locality</span>
+            <span class="ml-text">സ്ഥലം</span>
+          </label>
+          <input type="text" name="q" id="queryInput" class="search-input" placeholder="e.g. Kakkanad, Kowdiar">
+        </div>
+
+        <!-- BHK Selector -->
+        <div class="search-field-group">
+          <label class="search-label" for="bhkSelect">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span class="en-text">Bedrooms (BHK)</span>
+            <span class="ml-text">മുറികൾ</span>
+          </label>
+          <select name="bhk" id="bhkSelect" class="search-select">
+            <option value="">Any BHK</option>
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3">3 BHK</option>
+            <option value="4">4+ BHK Villa</option>
+          </select>
+        </div>
+
+        <!-- Max Budget -->
+        <div class="search-field-group">
+          <label class="search-label" for="maxRentSelect">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <span class="en-text">Max Budget</span>
+            <span class="ml-text">പരമാവധി വാടക</span>
+          </label>
+          <select name="max_rent" id="maxRentSelect" class="search-select">
+            <option value="">No Limit</option>
+            <option value="15000">Up to ₹15,000</option>
+            <option value="25000">Up to ₹25,000</option>
+            <option value="35000">Up to ₹35,000</option>
+            <option value="50000">Up to ₹50,000</option>
+            <option value="75000">Luxury (₹50k+)</option>
+          </select>
+        </div>
+
+        <!-- Search Button -->
+        <button type="submit" class="btn btn-primary-emerald btn-search-hero">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="en-text">Search Homes</span>
+          <span class="ml-text">തിരയുക</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Quick Popular Filters -->
+    <div class="hero-quick-filters">
+      <span class="quick-filter-title">Popular in Kerala:</span>
+      <a href="{{ url_for('properties', district='Ernakulam') }}" class="quick-chip">Kochi &bull; Ernakulam</a>
+      <a href="{{ url_for('properties', district='Thiruvananthapuram') }}" class="quick-chip">Technopark &bull; TVM</a>
+      <a href="{{ url_for('properties', property_type='Independent Villa') }}" class="quick-chip">Independent Villas</a>
+      <a href="{{ url_for('properties', property_type='Traditional Kerala Nalukettu') }}" class="quick-chip">Traditional Nalukettu</a>
+      <a href="{{ url_for('properties', max_rent='20000') }}" class="quick-chip">Under ₹20,000/mo</a>
+    </div>
+  </div>
+</section>
+
+<!-- 14 Kerala Districts Grid Showcase -->
+<section class="section-wrapper bg-white">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="section-pretitle">Explore Kerala Geography</span>
+      <h2 class="section-title">Rentals Across All 14 Districts</h2>
+      <p class="section-subtitle">
+        From the IT and commercial hubs of Kochi and Trivandrum to the peaceful backwaters and misty high ranges.
+      </p>
+    </div>
+
+    <div class="districts-grid">
+      {% for dist in districts_info %}
+      {% set count = district_counts.get(dist.name, 0) %}
+      <a href="{{ url_for('properties', district=dist.name) }}" class="district-card">
+        <img src="{{ dist.image }}" alt="{{ dist.name }} Kerala" class="district-card-img" loading="lazy">
+        <div class="district-card-overlay"></div>
+        <div class="district-card-info">
+          <h3 class="district-card-name">{{ dist.name }}</h3>
+          <span class="district-card-malayalam">{{ dist.malayalam }}</span>
+          <span class="district-card-count">
+            {% if count > 0 %}
+              {{ count }} {{ 'Home' if count == 1 else 'Homes' }} Available
+            {% else %}
+              Explore District
+            {% endif %}
+          </span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Featured Verified Homes Showcase -->
+<section class="section-wrapper bg-cream">
+  <div class="container">
+    <div class="section-header with-action">
+      <div>
+        <span class="section-pretitle">Curated Quality</span>
+        <h2 class="section-title">Featured Kerala Rental Properties</h2>
+        <p class="section-subtitle">Hand-inspected homes featuring verified photographs, genuine owners, and complete amenities.</p>
+      </div>
+      <a href="{{ url_for('properties', verified_only='1') }}" class="btn btn-outline-emerald">
+        View All Verified Listings
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+
+    <div class="properties-grid">
+      {% for prop in featured_properties %}
+      <article class="property-card">
+        <!-- Media / Photo -->
+        <div class="card-media">
+          <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">
+            <img src="{{ prop.primary_image_url }}" alt="{{ prop.title }}" class="card-img" loading="lazy">
+          </a>
+          <div class="card-top-badges">
+            {% if prop.is_verified %}
+            <span class="badge badge-verified">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Verified
+            </span>
+            {% endif %}
+            {% if prop.is_sample_demo %}
+            <span class="badge badge-demo">Sample Listing</span>
+            {% endif %}
+            <span class="badge badge-type">{{ prop.property_type }}</span>
+          </div>
+
+          <!-- Save Favorite Button -->
+          <button class="card-action-fav {% if prop.id in fav_ids %}is-active{% endif %}" data-prop-id="{{ prop.id }}" aria-label="Save Property">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+
+          <!-- Compare Button -->
+          <button class="card-action-compare {% if prop.id in compare_ids %}is-active{% endif %}" data-prop-id="{{ prop.id }}" aria-label="Compare Property">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+          </button>
+
+          <!-- Rent Overlay -->
+          <div class="card-price-overlay">
+            <div>
+              <span class="card-rent">{{ prop.formatted_rent }}</span>
+              <span class="card-rent-period">/mo</span>
+            </div>
+            <div class="card-deposit">Deposit: {{ prop.formatted_deposit }}</div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+          <div class="card-location">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>{{ prop.locality }}, {{ prop.district }}</span>
+          </div>
+
+          <h3 class="card-title">
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a>
+          </h3>
+
+          <!-- Specs Strip -->
+          <div class="card-specs-row">
+            <div class="spec-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+              <span>{{ prop.bhk }} BHK</span>
+            </div>
+            <div class="spec-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+              <span>{{ prop.sqft_area }} sq.ft</span>
+            </div>
+            <div class="spec-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+              <span>{{ prop.furnishing }}</span>
+            </div>
+          </div>
+
+          <!-- Footer with Owner info & Direct Actions -->
+          <div class="card-footer">
+            <div class="owner-mini-info">
+              <span class="owner-mini-name">{{ prop.owner_name }}</span>
+              <span class="owner-mini-type">{{ prop.owner_contact_type }}</span>
+            </div>
+            <div class="card-contact-actions">
+              {% if prop.contact_phone %}
+              <a href="tel:{{ prop.contact_phone }}" class="btn-icon-circle btn-call" title="Call Owner directly">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </a>
+              {% endif %}
+              {% if prop.whatsapp_number %}
+              <a href="https://wa.me/{{ prop.whatsapp_number|replace(' ', '')|replace('+', '') }}?text=Hello%20{{ prop.owner_name }},%20I%20am%20interested%20in%20your%20property%20{{ prop.title }}%20(ID:%20{{ prop.property_code }})%20on%20NestKerala." target="_blank" rel="noopener noreferrer" class="btn-icon-circle btn-whatsapp" title="Chat on WhatsApp">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"></path></svg>
+              </a>
+              {% endif %}
+              <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}" class="btn btn-outline-emerald btn-sm">
+                Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Budget-Friendly Section (< Rs 22,000) -->
+<section class="section-wrapper bg-white">
+  <div class="container">
+    <div class="section-header with-action">
+      <div>
+        <span class="section-pretitle">Affordable Quality</span>
+        <h2 class="section-title">Budget-Friendly Homes Under ₹22,000</h2>
+        <p class="section-subtitle">Comfortable, well-maintained family houses and flats with realistic rents across Kerala towns.</p>
+      </div>
+      <a href="{{ url_for('properties', max_rent='22000') }}" class="btn btn-secondary-emerald">
+        Browse Budget Homes
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </a>
+    </div>
+
+    <div class="properties-grid">
+      {% for prop in budget_properties %}
+      <article class="property-card">
+        <div class="card-media">
+          <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">
+            <img src="{{ prop.primary_image_url }}" alt="{{ prop.title }}" class="card-img" loading="lazy">
+          </a>
+          <div class="card-top-badges">
+            <span class="badge badge-type">{{ prop.bhk }} BHK</span>
+          </div>
+          <button class="card-action-fav {% if prop.id in fav_ids %}is-active{% endif %}" data-prop-id="{{ prop.id }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+          <div class="card-price-overlay">
+            <div>
+              <span class="card-rent">{{ prop.formatted_rent }}</span>
+              <span class="card-rent-period">/mo</span>
+            </div>
+            <div class="card-deposit">Deposit: {{ prop.formatted_deposit }}</div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="card-location">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>{{ prop.city_town }}, {{ prop.district }}</span>
+          </div>
+          <h3 class="card-title">
+            <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}">{{ prop.title }}</a>
+          </h3>
+
+          <div class="card-specs-row">
+            <div class="spec-item"><span>{{ prop.bhk }} BHK</span></div>
+            <div class="spec-item"><span>{{ prop.sqft_area }} sq.ft</span></div>
+            <div class="spec-item"><span>{{ prop.furnishing }}</span></div>
+          </div>
+
+          <div class="card-footer">
+            <div class="owner-mini-info">
+              <span class="owner-mini-name">{{ prop.owner_name }}</span>
+            </div>
+            <div class="card-contact-actions">
+              <a href="{{ url_for('property_detail', property_id=prop.id, slug=prop.slug) }}" class="btn btn-outline-emerald btn-sm">
+                View Property
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Trust & Kerala Real Estate Value Proposition -->
+<section class="section-wrapper bg-cream">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="section-pretitle">The NestKerala Difference</span>
+      <h2 class="section-title">Built for Authentic Kerala Rentals</h2>
+      <p class="section-subtitle">We solve the common frustrations of fake listings, obsolete photographs, and exorbitant middleman charges.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.75rem;">
+      <div style="background: white; padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+        <div style="width: 52px; height: 52px; background: var(--primary-50); color: var(--primary-700); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem;">Direct Owner Phone & WhatsApp</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          Every active listing features authorized contact credentials. Connect via telephone or WhatsApp instantly without paying hidden registration tokens.
+        </p>
+      </div>
+
+      <div style="background: white; padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+        <div style="width: 52px; height: 52px; background: var(--primary-50); color: var(--primary-700); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem;">Kerala Specific Infrastructure</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          Detailed information on KWA connections, open well water sweet potability, 3-phase KSEB power, solar roof systems, and flood-safe elevation.
+        </p>
+      </div>
+
+      <div style="background: white; padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+        <div style="width: 52px; height: 52px; background: var(--primary-50); color: var(--primary-700); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem;">Multi-Angle Real Photography</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          Full photo galleries of exterior sit-out verandas, living halls, bedrooms, modular kitchens, and car porches. No misleading stock graphics.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Homeowner Call-to-Action Banner -->
+<section style="background: var(--primary-900); color: white; padding: 4.5rem 0;">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+    <div style="max-width: 650px;">
+      <span style="color: var(--gold-400); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.5rem;">For Kerala Homeowners & NRI Landlords</span>
+      <h2 style="color: white; font-size: 2.3rem; font-weight: 800; margin-bottom: 0.8rem;">Have a House to Rent Out in Kerala?</h2>
+      <p style="color: #CBD5E1; font-size: 1.05rem; line-height: 1.6;">
+        Reach thousands of verified executive families, IT professionals, and respectable tenants looking for rental homes throughout all 14 districts.
+      </p>
+    </div>
+    <div>
+      <a href="{{ url_for('list_property') }}" class="btn btn-gold btn-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        List Your Property for Free
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
