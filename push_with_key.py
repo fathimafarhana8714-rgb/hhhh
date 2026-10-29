@@ -6,7 +6,7 @@ from dulwich.repo import Repo
 
 REPO_PATH = os.path.abspath(".")
 KEY_FILE = os.path.join(REPO_PATH, "id_ed25519")
-REMOTE_URL = "git@github.com:fathimafarhana8714-rgb/kerala-trip.git"
+REMOTE_URL = sys.argv[1] if len(sys.argv) > 1 else "git@github.com:fathimafarhana8714-rgb/hhhh.git"
 
 class CustomSSHVendor(dulwich.client.SubprocessSSHVendor):
     def run_command(self, host, command, **kwargs):
